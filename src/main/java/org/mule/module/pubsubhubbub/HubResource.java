@@ -10,6 +10,8 @@
 
 package org.mule.module.pubsubhubbub;
 
+import java.util.Map;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -28,39 +30,29 @@ import org.apache.commons.lang.StringUtils;
 @Produces(MediaType.TEXT_PLAIN)
 public class HubResource
 {
-    private SubscriptionHandler subscriptionHandler;
+    private Map<HubMode, AbstractHubActionHandler> handlers;
 
     @POST
     public Response handleRequest(final MultivaluedMap<String, String> formParams)
     {
         final HubMode hubMode = HubMode.valueOf(StringUtils.upperCase(formParams.getFirst(Constants.HUB_MODE_PARAM)));
+        final AbstractHubActionHandler handler = handlers.get(hubMode);
 
-        switch (hubMode)
+        if (handler == null)
         {
-            case SUBSCRIBE :
-                subscriptionHandler.subscribe(formParams);
-                break;
-
-            case UNSUBSCRIBE :
-                subscriptionHandler.unsubscribe(formParams);
-                break;
-
-            // FIXME add support for PUBLISH
-
-            default :
-                throw new UnsupportedOperationException(hubMode.toString());
+            throw new UnsupportedOperationException(hubMode.toString());
         }
 
-        return Response.noContent().build();
+        return handler.handle(formParams);
     }
 
-    public void setSubscriptionHandler(final SubscriptionHandler subscriptionHandler)
+    public void setHandlers(final Map<HubMode, AbstractHubActionHandler> handlers)
     {
-        this.subscriptionHandler = subscriptionHandler;
+        this.handlers = handlers;
     }
 
-    public SubscriptionHandler getSubscriptionHandler()
+    public Map<HubMode, AbstractHubActionHandler> getHandlers()
     {
-        return subscriptionHandler;
+        return handlers;
     }
 }

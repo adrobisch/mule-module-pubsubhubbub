@@ -16,33 +16,15 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 
-/**
- * Deals with subscription and unsubscription requests.
- */
-public class SubscriptionHandler
+public abstract class AbstractHubActionHandler
 {
-    public void subscribe(final MultivaluedMap<String, String> formParams)
-    {
-        final URL callbackUrl = getMadatoryUrlParameter(Constants.HUB_CALLBACK_PARAM, formParams);
-        final URL topicUrl = getMadatoryUrlParameter(Constants.HUB_TOPIC_PARAM, formParams);
-        final String verify = getMandatoryParameter(Constants.HUB_VERIFY_PARAM, formParams);
+    public abstract Response handle(final MultivaluedMap<String, String> formParams);
 
-        // TODO support optional parameters
-
-        // FIXME implement!
-        throw new UnsupportedOperationException("NOT IMPLEMENTED YET");
-    }
-
-    public void unsubscribe(final MultivaluedMap<String, String> formParams)
-    {
-        // FIXME implement!
-        throw new UnsupportedOperationException("NOT IMPLEMENTED YET");
-    }
-
-    private String getMandatoryParameter(final String name, final MultivaluedMap<String, String> formParams)
+    protected String getMandatoryParameter(final String name, final MultivaluedMap<String, String> formParams)
     {
         final String value = formParams.getFirst(name);
 
@@ -54,7 +36,7 @@ public class SubscriptionHandler
         return value;
     }
 
-    private URL getMadatoryUrlParameter(final String name, final MultivaluedMap<String, String> formParams)
+    protected URL getMadatoryUrlParameter(final String name, final MultivaluedMap<String, String> formParams)
     {
         final String value = getMandatoryParameter(name, formParams);
 
@@ -78,5 +60,4 @@ public class SubscriptionHandler
             throw new IllegalArgumentException("Invalid URL parameter: " + name, mue);
         }
     }
-
 }
