@@ -10,8 +10,13 @@
 
 package org.mule.module.pubsubhubbub;
 
+import java.util.concurrent.TimeUnit;
+
 public class Constants
 {
+    // TODO make this configurable on the hub
+    public static long DEFAULT_LEASE_SECONDS = TimeUnit.DAYS.toSeconds(7);
+
     // Common Parameters
     // Mandatory
     public static final String HUB_MODE_PARAM = "hub.mode";
@@ -21,8 +26,11 @@ public class Constants
     public static final String HUB_VERIFY_PARAM = "hub.verify";
     public static final String HUB_TOPIC_PARAM = "hub.topic";
     public static final String HUB_CALLBACK_PARAM = "hub.callback";
+    public static final String HUB_CHALLENGE_PARAM = "hub.challenge";
     // Optional
     public static final String HUB_LEASE_SECONDS_PARAM = "hub.lease_seconds";
     public static final String HUB_SECRET_PARAM = "hub.secret";
     public static final String HUB_VERIFY_TOKEN_PARAM = "hub.verify_token";
+
+    public static final long VERIFICATION_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(15L);
 }

@@ -13,10 +13,25 @@ package org.mule.module.pubsubhubbub;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
+import org.mule.api.MuleContext;
+import org.mule.api.context.MuleContextAware;
+
 /**
  * Defines a handler for processing hub requests.
  */
-public interface HubActionHandler
+public abstract class AbstractHubActionHandler implements MuleContextAware
 {
-    Response handle(final MultivaluedMap<String, String> formParams);
+    private MuleContext muleContext;
+
+    public void setMuleContext(final MuleContext muleContext)
+    {
+        this.muleContext = muleContext;
+    }
+
+    protected MuleContext getMuleContext()
+    {
+        return muleContext;
+    }
+
+    public abstract Response handle(final MultivaluedMap<String, String> formParams);
 }

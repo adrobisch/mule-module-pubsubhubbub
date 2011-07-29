@@ -10,7 +10,14 @@
 
 package org.mule.module.pubsubhubbub;
 
+import org.apache.commons.lang.StringUtils;
+
 public enum HubMode
 {
-    SUBSCRIBE, UNSUBSCRIBE, PUBLISH
+    SUBSCRIBE, UNSUBSCRIBE, PUBLISH;
+
+    public String getMode()
+    {
+        return StringUtils.lowerCase(this.toString());
+    }
 }

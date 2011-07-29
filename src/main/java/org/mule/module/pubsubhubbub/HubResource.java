@@ -10,10 +10,8 @@
 
 package org.mule.module.pubsubhubbub;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Map;
 
 import javax.ws.rs.Consumes;
@@ -34,15 +32,15 @@ import org.apache.commons.lang.StringUtils;
 @Produces(MediaType.TEXT_PLAIN)
 public class HubResource
 {
-    private Map<HubMode, HubActionHandler> handlers;
+    private Map<HubMode, AbstractHubActionHandler> handlers;
 
     @POST
     public Response handleRequest(final MultivaluedMap<String, String> formParams)
     {
-        final HubMode hubMode = HubMode.valueOf(StringUtils.upperCase(getMandatoryParameter(
+        final HubMode hubMode = HubMode.valueOf(StringUtils.upperCase(getMandatoryStringParameter(
             Constants.HUB_MODE_PARAM, formParams)));
 
-        final HubActionHandler handler = handlers.get(hubMode);
+        final AbstractHubActionHandler handler = handlers.get(hubMode);
 
         if (handler == null)
         {
@@ -52,18 +50,18 @@ public class HubResource
         return handler.handle(formParams);
     }
 
-    public void setHandlers(final Map<HubMode, HubActionHandler> handlers)
+    public void setHandlers(final Map<HubMode, AbstractHubActionHandler> handlers)
     {
         this.handlers = handlers;
     }
 
-    public Map<HubMode, HubActionHandler> getHandlers()
+    public Map<HubMode, AbstractHubActionHandler> getHandlers()
     {
         return handlers;
     }
 
-    public static String getMandatoryParameter(final String name,
-                                               final MultivaluedMap<String, String> formParams)
+    public static String getMandatoryStringParameter(final String name,
+                                                     final MultivaluedMap<String, String> formParams)
     {
         final String value = formParams.getFirst(name);
 
@@ -75,10 +73,10 @@ public class HubResource
         return value;
     }
 
-    public static URL getMandatoryUrlParameter(final String name,
+    public static URI getMandatoryUrlParameter(final String name,
                                                final MultivaluedMap<String, String> formParams)
     {
-        final String value = getMandatoryParameter(name, formParams);
+        final String value = getMandatoryStringParameter(name, formParams);
 
         try
         {
@@ -89,15 +87,12 @@ public class HubResource
                 throw new IllegalArgumentException("Fragment found in URL parameter: " + name);
             }
 
-            return uri.toURL();
+            return uri;
         }
-        catch (final URISyntaxException usi)
+        catch (final URISyntaxException use)
         {
-            throw new IllegalArgumentException("Invalid URL parameter: " + name, usi);
-        }
-        catch (final MalformedURLException mue)
-        {
-            throw new IllegalArgumentException("Invalid URL parameter: " + name, mue);
+            use.printStackTrace();
+            throw new IllegalArgumentException("Invalid URL parameter: " + name, use);
         }
     }
 }
