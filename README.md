@@ -9,7 +9,13 @@ Supported PubSubHubbub Version
 This module implements the [PubSubHubbub Core 0.3 -- Working Draft](http://pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.3.html) spec.
 
 
-Running the Test Suite
-----------------------
+Build Commands
+--------------
 
-    mvn clean install verify
+To compile and install in the local Maven repository:
+
+    mvn clean install  
+
+To run the test suite:
+
+    mvn -Pit verify
