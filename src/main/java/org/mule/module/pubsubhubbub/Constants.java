@@ -10,6 +10,7 @@
 
 package org.mule.module.pubsubhubbub;
 
+import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 
 public class Constants
@@ -33,4 +34,8 @@ public class Constants
     public static final String HUB_VERIFY_TOKEN_PARAM = "hub.verify_token";
 
     public static final long VERIFICATION_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(15L);
+
+    static final Charset UTF8_ENCODING = Charset.forName("UTF-8");
+
+    public static final int MAXIMUM_SECRET_SIZE = 200;
 }

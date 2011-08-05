@@ -30,19 +30,19 @@ public enum VerificationType
     SYNC
     {
         @Override
-        public Response verify(final SubscriptionRequest subscriptionRequest, final MuleContext muleContext)
+        public Response verify(final AbstractVerifiableRequest request, final MuleContext muleContext)
         {
 
-            attemptVerification(subscriptionRequest, muleContext);
+            attemptVerification(request, muleContext);
             return Response.noContent().build();
         }
     },
     ASYNC
     {
         @Override
-        public Response verify(final SubscriptionRequest subscriptionRequest, final MuleContext muleContext)
+        public Response verify(final AbstractVerifiableRequest request, final MuleContext muleContext)
         {
-            // FIXME implement!
+            // FIXME implement asynchronous verification
             return Response.status(Status.ACCEPTED).build();
         }
     };
@@ -62,58 +62,57 @@ public enum VerificationType
         }
     }
 
-    public abstract Response verify(SubscriptionRequest subscriptionRequest, MuleContext muleContext);
+    public abstract Response verify(AbstractVerifiableRequest request, MuleContext muleContext);
 
-    private static void attemptVerification(final SubscriptionRequest subscriptionRequest,
+    private static void attemptVerification(final AbstractVerifiableRequest request,
                                             final MuleContext muleContext)
     {
         final String verificationChallenge = UUID.randomUUID().toString();
 
         try
         {
-            final URI verificationUrl = buildVerificationUrl(subscriptionRequest, verificationChallenge);
+            final URI verificationUrl = buildVerificationUrl(request, verificationChallenge);
 
             final MuleMessage response = new MuleClient(muleContext).request(verificationUrl.toString(),
                 Constants.VERIFICATION_TIMEOUT_MILLIS);
 
-            validateResponse(response, subscriptionRequest, verificationChallenge);
+            validateResponse(response, request, verificationChallenge);
 
-            // TODO store validated subscription or unsubscription
+            // FIXME store validated subscription or unsubscription
         }
         catch (final URISyntaxException use)
         {
-            throw new RuntimeException("Failed to build verification URL for: " + subscriptionRequest, use);
+            throw new RuntimeException("Failed to build verification URL for: " + request, use);
         }
         catch (final MuleException me)
         {
-            throw new RuntimeException("Failed to call verification URL for: " + subscriptionRequest, me);
+            throw new RuntimeException("Failed to call verification URL for: " + request, me);
         }
     }
 
     private static void validateResponse(final MuleMessage response,
-                                         final SubscriptionRequest subscriptionRequest,
+                                         final AbstractVerifiableRequest request,
                                          final String verificationChallenge)
     {
         if (response == null)
         {
             throw new IllegalStateException("No response has been received during verification of: "
-                                            + subscriptionRequest);
+                                            + request);
         }
 
-        final String payload = getPayloadAsString(response, subscriptionRequest);
+        final String payload = getPayloadAsString(response, request);
 
         if (!StringUtils.equals(payload, verificationChallenge))
         {
             LOG.warn("Got challenge: " + payload + ", expecting: " + verificationChallenge + ", for: "
-                     + subscriptionRequest);
+                     + request);
 
-            throw new IllegalArgumentException("Wrong value for verification challenge of: "
-                                               + subscriptionRequest);
+            throw new IllegalArgumentException("Wrong value for verification challenge of: " + request);
         }
     }
 
     private static String getPayloadAsString(final MuleMessage response,
-                                             final SubscriptionRequest subscriptionRequest)
+                                             final AbstractVerifiableRequest request)
     {
         try
         {
@@ -121,30 +120,28 @@ public enum VerificationType
         }
         catch (final Exception e)
         {
-            throw new RuntimeException("Failed to retrieve verification response URL for: "
-                                       + subscriptionRequest, e);
+            throw new RuntimeException("Failed to retrieve verification response URL for: " + request, e);
         }
     }
 
-    private static URI buildVerificationUrl(final SubscriptionRequest subscriptionRequest,
+    private static URI buildVerificationUrl(final AbstractVerifiableRequest request,
                                             final String verificationChallenge) throws URISyntaxException
     {
         final StringBuilder queryBuilder = new StringBuilder(
-            StringUtils.defaultString(subscriptionRequest.getCallbackUrl().getQuery()));
+            StringUtils.defaultString(request.getCallbackUrl().getQuery()));
 
-        appendToQuery(Constants.HUB_MODE_PARAM, subscriptionRequest.getMode(), queryBuilder);
-        appendToQuery(Constants.HUB_TOPIC_PARAM, subscriptionRequest.getTopicUrl().toString(), queryBuilder);
+        appendToQuery(Constants.HUB_MODE_PARAM, request.getMode(), queryBuilder);
+        appendToQuery(Constants.HUB_TOPIC_PARAM, request.getTopicUrl().toString(), queryBuilder);
         appendToQuery(Constants.HUB_CHALLENGE_PARAM, verificationChallenge, queryBuilder);
-        appendToQuery(Constants.HUB_LEASE_SECONDS_PARAM,
-            Long.toString(subscriptionRequest.getLeaseSeconds()), queryBuilder);
+        appendToQuery(Constants.HUB_LEASE_SECONDS_PARAM, Long.toString(request.getLeaseSeconds()),
+            queryBuilder);
 
-        if (StringUtils.isNotBlank(subscriptionRequest.getVerificationToken()))
+        if (StringUtils.isNotBlank(request.getVerificationToken()))
         {
-            appendToQuery(Constants.HUB_VERIFY_TOKEN_PARAM, subscriptionRequest.getVerificationToken(),
-                queryBuilder);
+            appendToQuery(Constants.HUB_VERIFY_TOKEN_PARAM, request.getVerificationToken(), queryBuilder);
         }
 
-        final URI callbackUrl = subscriptionRequest.getCallbackUrl();
+        final URI callbackUrl = request.getCallbackUrl();
         return new URI(callbackUrl.getScheme(), callbackUrl.getUserInfo(), callbackUrl.getHost(),
             callbackUrl.getPort(), callbackUrl.getPath(), queryBuilder.toString(), null);
     }

@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.mule.api.MuleException;
@@ -68,7 +69,23 @@ public class HubITCase extends DynamicPortTestCase
         assertEquals("Missing mandatory parameter: hub.callback", response.getPayloadAsString());
     }
 
-    public void testFailedSynchronousSubscription() throws Exception
+    public void testSubscriptionRequestWithTooBigASecret() throws Exception
+    {
+        final Map<String, String> subscriptionRequest = new HashMap<String, String>();
+        subscriptionRequest.put("hub.mode", "subscribe");
+        subscriptionRequest.put("hub.mode", "subscribe");
+        subscriptionRequest.put("hub.callback", "http://localhost:" + getSubscriberCallbacksPort()
+                                                + "/cb-failure");
+        subscriptionRequest.put("hub.topic", TEST_TOPIC);
+        subscriptionRequest.put("hub.verify", "sync");
+        subscriptionRequest.put("hub.secret", RandomStringUtils.randomAlphanumeric(200));
+
+        final MuleMessage response = sendRequestToHub(subscriptionRequest);
+        assertEquals("400", response.getInboundProperty("http.status"));
+        assertEquals("Maximum secret size is 200 bytes", response.getPayloadAsString());
+    }
+
+    public void testFailedSynchronousSubscriptionConfirmation() throws Exception
     {
         final Map<String, String> subscriptionRequest = new HashMap<String, String>();
         subscriptionRequest.put("hub.mode", "subscribe");
@@ -83,12 +100,37 @@ public class HubITCase extends DynamicPortTestCase
 
     public void testSuccessfullSynchronousSubscription() throws Exception
     {
+        testSuccessfullSynchronousSubscription(false);
+    }
+
+    public void testSuccessfullSynchronousSubscriptionWithVerifyToken() throws Exception
+    {
+        final Map<String, String> extraSubscriptionParam = Collections.singletonMap("hub.verify_token",
+            RandomStringUtils.randomAlphanumeric(20));
+        testSuccessfullSynchronousSubscription(extraSubscriptionParam, false);
+    }
+
+    public void testSuccessfullSynchronousSubscriptionWithQueryParamInCallback() throws Exception
+    {
+        testSuccessfullSynchronousSubscription(true);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void testSuccessfullSynchronousSubscription(final boolean hasQueryParamCallback) throws Exception
+    {
+        testSuccessfullSynchronousSubscription(Collections.EMPTY_MAP, hasQueryParamCallback);
+    }
+
+    private void testSuccessfullSynchronousSubscription(final Map<String, String> extraSubscriptionParam,
+                                                        final boolean hasQueryParamCallback) throws Exception
+    {
         final Map<String, String> subscriptionRequest = new HashMap<String, String>();
         subscriptionRequest.put("hub.mode", "subscribe");
         subscriptionRequest.put("hub.callback", "http://localhost:" + getSubscriberCallbacksPort()
-                                                + "/cb-success");
+                                                + "/cb-success" + (hasQueryParamCallback ? "?foo=bar" : ""));
         subscriptionRequest.put("hub.topic", TEST_TOPIC);
         subscriptionRequest.put("hub.verify", "sync");
+        subscriptionRequest.putAll(extraSubscriptionParam);
 
         final MuleMessage response = sendRequestToHub(subscriptionRequest);
 
@@ -100,9 +142,26 @@ public class HubITCase extends DynamicPortTestCase
         assertEquals(TEST_TOPIC, subscriberVerifyParams.get("hub.topic").get(0));
         assertTrue(StringUtils.isNotBlank(subscriberVerifyParams.get("hub.challenge").get(0)));
         assertTrue(NumberUtils.isDigits(subscriberVerifyParams.get("hub.lease_seconds").get(0)));
-    }
 
-    // TODO test secret and extra query string propagation
+        final String verifyToken = subscriptionRequest.get("hub.verify_token");
+        if (StringUtils.isNotBlank(verifyToken))
+        {
+            assertEquals(verifyToken, subscriberVerifyParams.get("hub.verify_token").get(0));
+        }
+        else
+        {
+            assertNull(subscriberVerifyParams.get("hub.verify_token"));
+        }
+
+        if (hasQueryParamCallback)
+        {
+            assertEquals("bar", subscriberVerifyParams.get("foo").get(0));
+        }
+        else
+        {
+            assertNull(subscriberVerifyParams.get("foo"));
+        }
+    }
 
     private MuleMessage sendRequestToHub(final Map<String, String> subscriptionRequest) throws MuleException
     {
