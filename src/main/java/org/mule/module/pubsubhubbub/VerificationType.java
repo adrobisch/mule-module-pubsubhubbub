@@ -26,7 +26,6 @@ import org.mule.api.MuleMessage;
 import org.mule.module.client.MuleClient;
 
 public enum VerificationType
-
 {
     SYNC
     {
@@ -65,6 +64,8 @@ public enum VerificationType
                 Constants.VERIFICATION_TIMEOUT_MILLIS);
 
             validateResponse(response, subscriptionRequest, verificationChallenge);
+
+            // TODO store validated subscription or unsubscription
         }
         catch (final URISyntaxException use)
         {

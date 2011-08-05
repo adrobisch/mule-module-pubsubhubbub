@@ -7,3 +7,9 @@ Supported PubSubHubbub Version
 ------------------------------
 
 This module implements the [PubSubHubbub Core 0.3 -- Working Draft](http://pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.3.html) spec.
+
+
+Running the Test Suite
+----------------------
+
+    mvn clean install verify
