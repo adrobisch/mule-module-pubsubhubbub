@@ -12,8 +12,11 @@ package org.mule.module.pubsubhubbub;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
 import org.mule.module.client.MuleClient;
@@ -51,6 +54,7 @@ public class HubITCase extends DynamicPortTestCase
 
         final MuleMessage response = sendRequestToHub(subscriptionRequest);
         assertEquals("400", response.getInboundProperty("http.status"));
+        assertEquals("Unsupported hub mode: foo", response.getPayloadAsString());
     }
 
     public void testBadSubscriptionRequest() throws Exception
@@ -90,8 +94,12 @@ public class HubITCase extends DynamicPortTestCase
 
         assertEquals("204", response.getInboundProperty("http.status"));
 
-        // TODO test value of getFunctionalTestComponent("successfullSubscriberCallback").getLastReceivedMessage()
-        // /cb-success?hub.mode=subscribe&hub.topic=http://mulesoft.org/fake-topic&hub.challenge=997a485e-1b70-47db-9f72-51a6b5b3b3f2&hub.lease_seconds=604799
+        final Map<String, List<String>> subscriberVerifyParams = TestUtils.getUrlParameters(getFunctionalTestComponent(
+            "successfullSubscriberCallback").getLastReceivedMessage().toString());
+        assertEquals("subscribe", subscriberVerifyParams.get("hub.mode").get(0));
+        assertEquals(TEST_TOPIC, subscriberVerifyParams.get("hub.topic").get(0));
+        assertTrue(StringUtils.isNotBlank(subscriberVerifyParams.get("hub.challenge").get(0)));
+        assertTrue(NumberUtils.isDigits(subscriberVerifyParams.get("hub.lease_seconds").get(0)));
     }
 
     // TODO test secret and extra query string propagation

@@ -49,6 +49,19 @@ public enum VerificationType
 
     private final static Log LOG = LogFactory.getLog(VerificationType.class);
 
+    public static VerificationType parse(final String s)
+    {
+        try
+        {
+            return valueOf(StringUtils.upperCase(s));
+        }
+        catch (final IllegalArgumentException iae)
+        {
+            // rethrow with a less technical message, as it is routed back to the caller
+            throw new IllegalArgumentException("Unsupported verification mode: " + s, iae);
+        }
+    }
+
     public abstract Response verify(SubscriptionRequest subscriptionRequest, MuleContext muleContext);
 
     private static void attemptVerification(final SubscriptionRequest subscriptionRequest,

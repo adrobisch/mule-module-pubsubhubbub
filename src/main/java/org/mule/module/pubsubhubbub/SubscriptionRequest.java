@@ -108,7 +108,7 @@ public class SubscriptionRequest
         {
             try
             {
-                return VerificationType.valueOf(StringUtils.upperCase(verificationMode));
+                return VerificationType.parse(verificationMode);
             }
             catch (final IllegalArgumentException iae)
             {

@@ -37,8 +37,8 @@ public class HubResource
     @POST
     public Response handleRequest(final MultivaluedMap<String, String> formParams)
     {
-        final HubMode hubMode = HubMode.valueOf(StringUtils.upperCase(getMandatoryStringParameter(
-            Constants.HUB_MODE_PARAM, formParams)));
+        final HubMode hubMode = HubMode.parse(getMandatoryStringParameter(Constants.HUB_MODE_PARAM,
+            formParams));
 
         final AbstractHubActionHandler handler = handlers.get(hubMode);
 

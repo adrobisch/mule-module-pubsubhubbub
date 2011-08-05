@@ -20,4 +20,17 @@ public enum HubMode
     {
         return StringUtils.lowerCase(this.toString());
     }
+
+    public static HubMode parse(final String s)
+    {
+        try
+        {
+            return valueOf(StringUtils.upperCase(s));
+        }
+        catch (final IllegalArgumentException iae)
+        {
+            // rethrow with a less technical message, as it is routed back to the caller
+            throw new IllegalArgumentException("Unsupported hub mode: " + s, iae);
+        }
+    }
 }
