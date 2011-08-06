@@ -41,7 +41,7 @@ public class DataStore
         }
         catch (final ObjectStoreException ose)
         {
-            throw new RuntimeException("Failed to store topic subscription at " + topicUrl, ose);
+            throw new RuntimeException("Failed to store: " + subscription, ose);
         }
     }
 

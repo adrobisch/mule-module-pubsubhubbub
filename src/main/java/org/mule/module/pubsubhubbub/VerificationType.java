@@ -47,7 +47,9 @@ public enum VerificationType
                                final MuleContext muleContext,
                                final Runnable successAction)
         {
-            // FIXME implement asynchronous verification
+            // FIXME implement asynchronous verification (the following is obviously sync)
+            attemptVerification(request, muleContext);
+            successAction.run();
             return Response.status(Status.ACCEPTED).build();
         }
     };

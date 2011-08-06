@@ -10,6 +10,7 @@
 
 package org.mule.module.pubsubhubbub;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -19,11 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
+import org.mule.api.registry.RegistrationException;
 import org.mule.module.client.MuleClient;
 import org.mule.tck.DynamicPortTestCase;
 import org.mule.transport.http.HttpConstants;
@@ -70,7 +73,7 @@ public class HubITCase extends DynamicPortTestCase
         final Map<String, String> subscriptionRequest = new HashMap<String, String>();
         subscriptionRequest.put("hub.mode", "foo");
 
-        final MuleMessage response = sendRequestToHub(subscriptionRequest);
+        final MuleMessage response = wrapAndSendRequestToHub(subscriptionRequest);
         assertEquals("400", response.getInboundProperty("http.status"));
         assertEquals("Unsupported hub mode: foo", response.getPayloadAsString());
     }
@@ -81,7 +84,7 @@ public class HubITCase extends DynamicPortTestCase
         subscriptionRequest.put("hub.mode", "subscribe");
         // missing all other required parameters
 
-        final MuleMessage response = sendRequestToHub(subscriptionRequest);
+        final MuleMessage response = wrapAndSendRequestToHub(subscriptionRequest);
         assertEquals("400", response.getInboundProperty("http.status"));
         assertEquals("Missing mandatory parameter: hub.callback", response.getPayloadAsString());
     }
@@ -97,7 +100,7 @@ public class HubITCase extends DynamicPortTestCase
         subscriptionRequest.put("hub.verify", "sync");
         subscriptionRequest.put("hub.secret", RandomStringUtils.randomAlphanumeric(200));
 
-        final MuleMessage response = sendRequestToHub(subscriptionRequest);
+        final MuleMessage response = wrapAndSendRequestToHub(subscriptionRequest);
         assertEquals("400", response.getInboundProperty("http.status"));
         assertEquals("Maximum secret size is 200 bytes", response.getPayloadAsString());
     }
@@ -111,7 +114,7 @@ public class HubITCase extends DynamicPortTestCase
         subscriptionRequest.put("hub.topic", TEST_TOPIC);
         subscriptionRequest.put("hub.verify", "sync");
 
-        final MuleMessage response = sendRequestToHub(subscriptionRequest);
+        final MuleMessage response = wrapAndSendRequestToHub(subscriptionRequest);
         assertEquals("500", response.getInboundProperty("http.status"));
     }
 
@@ -122,8 +125,8 @@ public class HubITCase extends DynamicPortTestCase
 
     public void testSuccessfullSynchronousSubscriptionWithVerifyToken() throws Exception
     {
-        final Map<String, String> extraSubscriptionParam = Collections.singletonMap("hub.verify_token",
-            RandomStringUtils.randomAlphanumeric(20));
+        final Map<String, List<String>> extraSubscriptionParam = Collections.singletonMap("hub.verify_token",
+            Collections.singletonList(RandomStringUtils.randomAlphanumeric(20)));
         doTestSuccessfullSynchronousSubscription(extraSubscriptionParam);
     }
 
@@ -134,17 +137,28 @@ public class HubITCase extends DynamicPortTestCase
 
     public void testSuccessfullSynchronousSubscriptionWithSecret() throws Exception
     {
-        final Map<String, String> extraSubscriptionParam = Collections.singletonMap("hub.secret",
-            RandomStringUtils.randomAlphanumeric(20));
+        final Map<String, List<String>> extraSubscriptionParam = Collections.singletonMap("hub.secret",
+            Collections.singletonList(RandomStringUtils.randomAlphanumeric(20)));
         doTestSuccessfullSynchronousSubscription(extraSubscriptionParam);
     }
+
+    public void testSuccessfullSynchronousMultiTopicsSubscription() throws Exception
+    {
+        final Map<String, List<String>> extraSubscriptionParam = Collections.singletonMap("hub.topic",
+            Arrays.asList("http://mulesoft.org/faketopic1", "http://mulesoft.org/faketopic2"));
+        doTestSuccessfullSynchronousSubscription(extraSubscriptionParam);
+    }
+
+    // TODO test re-subscription
+
+    // Support methods
 
     private void doTestSuccessfullSynchronousSubscription() throws Exception
     {
         doTestSuccessfullSynchronousSubscription("");
     }
 
-    private void doTestSuccessfullSynchronousSubscription(final Map<String, String> extraSubscriptionParam)
+    private void doTestSuccessfullSynchronousSubscription(final Map<String, List<String>> extraSubscriptionParam)
         throws Exception
     {
         dotestSuccessfullSynchronousSubscription(extraSubscriptionParam, "");
@@ -156,34 +170,48 @@ public class HubITCase extends DynamicPortTestCase
         dotestSuccessfullSynchronousSubscription(Collections.EMPTY_MAP, callbackQuery);
     }
 
-    // TODO test multi-topic subscription
-    // TODO test re-subscription
-
-    private void dotestSuccessfullSynchronousSubscription(final Map<String, String> extraSubscriptionParam,
+    private void dotestSuccessfullSynchronousSubscription(final Map<String, List<String>> extraSubscriptionParam,
                                                           final String callbackQuery) throws Exception
     {
         final String callback = "http://localhost:" + getSubscriberCallbacksPort() + "/cb-success"
                                 + callbackQuery;
 
-        final Map<String, String> subscriptionRequest = new HashMap<String, String>();
-        subscriptionRequest.put("hub.mode", "subscribe");
-        subscriptionRequest.put("hub.callback", callback);
-        subscriptionRequest.put("hub.topic", TEST_TOPIC);
-        subscriptionRequest.put("hub.verify", "sync");
+        final Map<String, List<String>> subscriptionRequest = new HashMap<String, List<String>>();
+        subscriptionRequest.put("hub.mode", Collections.singletonList("subscribe"));
+        subscriptionRequest.put("hub.callback", Collections.singletonList(callback));
+        subscriptionRequest.put("hub.topic", Collections.singletonList(TEST_TOPIC));
+        subscriptionRequest.put("hub.verify", Collections.singletonList("sync"));
         subscriptionRequest.putAll(extraSubscriptionParam);
 
         final MuleMessage response = sendRequestToHub(subscriptionRequest);
 
         assertEquals("204", response.getInboundProperty("http.status"));
 
+        checkVerificationMessage(callbackQuery, subscriptionRequest);
+        checkTopicSubscriptionStored(callback, subscriptionRequest);
+    }
+
+    private void checkVerificationMessage(final String callbackQuery,
+                                          final Map<String, List<String>> subscriptionRequest)
+        throws UnsupportedEncodingException, Exception
+    {
         final Map<String, List<String>> subscriberVerifyParams = TestUtils.getUrlParameters(getFunctionalTestComponent(
             "successfullSubscriberCallback").getLastReceivedMessage().toString());
+
         assertEquals("subscribe", subscriberVerifyParams.get("hub.mode").get(0));
-        assertEquals(TEST_TOPIC, subscriberVerifyParams.get("hub.topic").get(0));
         assertTrue(StringUtils.isNotBlank(subscriberVerifyParams.get("hub.challenge").get(0)));
         assertTrue(NumberUtils.isDigits(subscriberVerifyParams.get("hub.lease_seconds").get(0)));
 
-        final String verifyToken = subscriptionRequest.get("hub.verify_token");
+        for (final String hubTopic : subscriptionRequest.get("hub.topic"))
+        {
+            assertTrue(subscriberVerifyParams.get("hub.topic").contains(hubTopic));
+        }
+
+        final String verifyToken = subscriptionRequest.get("hub.verify_token") != null
+                                                                                      ? subscriptionRequest.get(
+                                                                                          "hub.verify_token")
+                                                                                          .get(0)
+                                                                                      : null;
         if (StringUtils.isNotBlank(verifyToken))
         {
             assertEquals(verifyToken, subscriberVerifyParams.get("hub.verify_token").get(0));
@@ -205,28 +233,62 @@ public class HubITCase extends DynamicPortTestCase
         {
             assertNull(subscriberVerifyParams.get("foo"));
         }
+    }
 
+    private void checkTopicSubscriptionStored(final String callback,
+                                              final Map<String, List<String>> subscriptionRequest)
+        throws RegistrationException, URISyntaxException, UnsupportedEncodingException
+    {
         final DataStore dataStore = muleContext.getRegistry().lookupObject(DataStore.class);
-        final TopicSubscription topicSubscription = dataStore.getTopicSubscription(TEST_TOPIC_URI);
-        assertEquals(TEST_TOPIC_URI, topicSubscription.getTopicUrl());
-        assertEquals(new URI(callback), topicSubscription.getCallbackUrl());
-        assertTrue(topicSubscription.getExpiryTime() > 0L);
-        final String secretAsString = subscriptionRequest.get("hub.secret");
-        if (StringUtils.isNotBlank(secretAsString))
+        for (final String hubTopic : subscriptionRequest.get("hub.topic"))
         {
-            assertTrue(Arrays.equals(secretAsString.getBytes("utf-8"), topicSubscription.getSecret()));
-        }
-        else
-        {
-            assertNull(topicSubscription.getSecret());
+            final URI hubTopicUri = new URI(hubTopic);
+            final TopicSubscription topicSubscription = dataStore.getTopicSubscription(hubTopicUri);
+            assertEquals(hubTopicUri, topicSubscription.getTopicUrl());
+            assertEquals(new URI(callback), topicSubscription.getCallbackUrl());
+            assertTrue(topicSubscription.getExpiryTime() > 0L);
+            final String secretAsString = subscriptionRequest.get("hub.secret") != null
+                                                                                       ? subscriptionRequest.get(
+                                                                                           "hub.secret")
+                                                                                           .get(0)
+                                                                                       : null;
+            if (StringUtils.isNotBlank(secretAsString))
+            {
+                assertTrue(Arrays.equals(secretAsString.getBytes("utf-8"), topicSubscription.getSecret()));
+            }
+            else
+            {
+                assertNull(topicSubscription.getSecret());
+            }
         }
     }
 
-    private MuleMessage sendRequestToHub(final Map<String, String> subscriptionRequest) throws MuleException
+    private MuleMessage wrapAndSendRequestToHub(final Map<String, String> subscriptionRequest)
+        throws MuleException
     {
-        final MuleMessage response = muleClient.send("http://localhost:" + getHubPort() + "/push/hub",
-            subscriptionRequest,
-            Collections.singletonMap(HttpConstants.HEADER_CONTENT_TYPE, "application/x-www-form-urlencoded"));
+        final Map<String, List<String>> wrappedRequest = new HashMap<String, List<String>>();
+        for (final Entry<String, String> param : subscriptionRequest.entrySet())
+        {
+            wrappedRequest.put(param.getKey(), Collections.singletonList(param.getValue()));
+        }
+        return sendRequestToHub(wrappedRequest);
+    }
+
+    private MuleMessage sendRequestToHub(final Map<String, List<String>> subscriptionRequest)
+        throws MuleException
+    {
+        final String hubUrl = "http://localhost:" + getHubPort() + "/push/hub";
+
+        final PostMethod postMethod = new PostMethod(hubUrl);
+        postMethod.setRequestHeader(HttpConstants.HEADER_CONTENT_TYPE, "application/x-www-form-urlencoded");
+        for (final Entry<String, List<String>> param : subscriptionRequest.entrySet())
+        {
+            for (final String value : param.getValue())
+            {
+                postMethod.addParameter(param.getKey(), value);
+            }
+        }
+        final MuleMessage response = muleClient.send(hubUrl, postMethod, null);
         return response;
     }
 
