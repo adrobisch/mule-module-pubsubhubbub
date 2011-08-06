@@ -23,6 +23,8 @@ public abstract class AbstractHubActionHandler implements MuleContextAware
 {
     private MuleContext muleContext;
 
+    private DataStore dataStore;
+
     public void setMuleContext(final MuleContext muleContext)
     {
         this.muleContext = muleContext;
@@ -31,6 +33,16 @@ public abstract class AbstractHubActionHandler implements MuleContextAware
     protected MuleContext getMuleContext()
     {
         return muleContext;
+    }
+
+    public void setDataStore(final DataStore dataStore)
+    {
+        this.dataStore = dataStore;
+    }
+
+    public DataStore getDataStore()
+    {
+        return dataStore;
     }
 
     public abstract Response handle(final MultivaluedMap<String, String> formParams);

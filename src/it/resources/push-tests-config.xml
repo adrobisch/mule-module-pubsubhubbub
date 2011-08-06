@@ -16,7 +16,19 @@
        
   <!-- Currently: use raw Spring Beans, Later on: specific PuSH XML elements will be created -->
   <spring:beans>
+    <spring:bean id="subscriptionStore"
+                 class="org.mule.util.store.InMemoryObjectStore" />
+                 
+    <spring:bean id="dataStore"
+                 class="org.mule.module.pubsubhubbub.DataStore"
+                 p:subscriptionStore-ref="subscriptionStore" />
+                 
+    <spring:bean id="hubActionHandler"
+                 abstract="true"
+                 p:dataStore-ref="dataStore" />
+                 
     <spring:bean id="subscriptionHandler"
+                 parent="hubActionHandler"
                  class="org.mule.module.pubsubhubbub.HubSubscriptionHandler" />
                  
     <util:map id="handlers">

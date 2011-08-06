@@ -10,10 +10,14 @@
 
 package org.mule.module.pubsubhubbub;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
@@ -27,6 +31,19 @@ import org.mule.transport.http.HttpConstants;
 public class HubITCase extends DynamicPortTestCase
 {
     private static final String TEST_TOPIC = "http://mulesoft.org/fake-topic";
+    private static final URI TEST_TOPIC_URI;
+    static
+    {
+        try
+        {
+            TEST_TOPIC_URI = new URI(TEST_TOPIC);
+        }
+        catch (final URISyntaxException urise)
+        {
+            throw new RuntimeException(urise);
+        }
+    }
+
     private MuleClient muleClient;
 
     @Override
@@ -100,34 +117,57 @@ public class HubITCase extends DynamicPortTestCase
 
     public void testSuccessfullSynchronousSubscription() throws Exception
     {
-        testSuccessfullSynchronousSubscription(false);
+        doTestSuccessfullSynchronousSubscription();
     }
 
     public void testSuccessfullSynchronousSubscriptionWithVerifyToken() throws Exception
     {
         final Map<String, String> extraSubscriptionParam = Collections.singletonMap("hub.verify_token",
             RandomStringUtils.randomAlphanumeric(20));
-        testSuccessfullSynchronousSubscription(extraSubscriptionParam, false);
+        doTestSuccessfullSynchronousSubscription(extraSubscriptionParam);
     }
 
     public void testSuccessfullSynchronousSubscriptionWithQueryParamInCallback() throws Exception
     {
-        testSuccessfullSynchronousSubscription(true);
+        doTestSuccessfullSynchronousSubscription("?foo=bar");
+    }
+
+    public void testSuccessfullSynchronousSubscriptionWithSecret() throws Exception
+    {
+        final Map<String, String> extraSubscriptionParam = Collections.singletonMap("hub.secret",
+            RandomStringUtils.randomAlphanumeric(20));
+        doTestSuccessfullSynchronousSubscription(extraSubscriptionParam);
+    }
+
+    private void doTestSuccessfullSynchronousSubscription() throws Exception
+    {
+        doTestSuccessfullSynchronousSubscription("");
+    }
+
+    private void doTestSuccessfullSynchronousSubscription(final Map<String, String> extraSubscriptionParam)
+        throws Exception
+    {
+        dotestSuccessfullSynchronousSubscription(extraSubscriptionParam, "");
     }
 
     @SuppressWarnings("unchecked")
-    private void testSuccessfullSynchronousSubscription(final boolean hasQueryParamCallback) throws Exception
+    private void doTestSuccessfullSynchronousSubscription(final String callbackQuery) throws Exception
     {
-        testSuccessfullSynchronousSubscription(Collections.EMPTY_MAP, hasQueryParamCallback);
+        dotestSuccessfullSynchronousSubscription(Collections.EMPTY_MAP, callbackQuery);
     }
 
-    private void testSuccessfullSynchronousSubscription(final Map<String, String> extraSubscriptionParam,
-                                                        final boolean hasQueryParamCallback) throws Exception
+    // TODO test multi-topic subscription
+    // TODO test re-subscription
+
+    private void dotestSuccessfullSynchronousSubscription(final Map<String, String> extraSubscriptionParam,
+                                                          final String callbackQuery) throws Exception
     {
+        final String callback = "http://localhost:" + getSubscriberCallbacksPort() + "/cb-success"
+                                + callbackQuery;
+
         final Map<String, String> subscriptionRequest = new HashMap<String, String>();
         subscriptionRequest.put("hub.mode", "subscribe");
-        subscriptionRequest.put("hub.callback", "http://localhost:" + getSubscriberCallbacksPort()
-                                                + "/cb-success" + (hasQueryParamCallback ? "?foo=bar" : ""));
+        subscriptionRequest.put("hub.callback", callback);
         subscriptionRequest.put("hub.topic", TEST_TOPIC);
         subscriptionRequest.put("hub.verify", "sync");
         subscriptionRequest.putAll(extraSubscriptionParam);
@@ -153,13 +193,32 @@ public class HubITCase extends DynamicPortTestCase
             assertNull(subscriberVerifyParams.get("hub.verify_token"));
         }
 
-        if (hasQueryParamCallback)
+        if (StringUtils.isNotBlank(callbackQuery))
         {
-            assertEquals("bar", subscriberVerifyParams.get("foo").get(0));
+            final Map<String, List<String>> queryParams = TestUtils.getUrlParameters(callbackQuery);
+            for (final Entry<String, List<String>> queryParam : queryParams.entrySet())
+            {
+                assertEquals(queryParam.getValue(), subscriberVerifyParams.get(queryParam.getKey()));
+            }
         }
         else
         {
             assertNull(subscriberVerifyParams.get("foo"));
+        }
+
+        final DataStore dataStore = muleContext.getRegistry().lookupObject(DataStore.class);
+        final TopicSubscription topicSubscription = dataStore.getTopicSubscription(TEST_TOPIC_URI);
+        assertEquals(TEST_TOPIC_URI, topicSubscription.getTopicUrl());
+        assertEquals(new URI(callback), topicSubscription.getCallbackUrl());
+        assertTrue(topicSubscription.getExpiryTime() > 0L);
+        final String secretAsString = subscriptionRequest.get("hub.secret");
+        if (StringUtils.isNotBlank(secretAsString))
+        {
+            assertTrue(Arrays.equals(secretAsString.getBytes("utf-8"), topicSubscription.getSecret()));
+        }
+        else
+        {
+            assertNull(topicSubscription.getSecret());
         }
     }
 

@@ -30,17 +30,22 @@ public enum VerificationType
     SYNC
     {
         @Override
-        public Response verify(final AbstractVerifiableRequest request, final MuleContext muleContext)
+        public Response verify(final AbstractVerifiableRequest request,
+                               final MuleContext muleContext,
+                               final Runnable successAction)
         {
 
             attemptVerification(request, muleContext);
+            successAction.run();
             return Response.noContent().build();
         }
     },
     ASYNC
     {
         @Override
-        public Response verify(final AbstractVerifiableRequest request, final MuleContext muleContext)
+        public Response verify(final AbstractVerifiableRequest request,
+                               final MuleContext muleContext,
+                               final Runnable successAction)
         {
             // FIXME implement asynchronous verification
             return Response.status(Status.ACCEPTED).build();
@@ -62,7 +67,9 @@ public enum VerificationType
         }
     }
 
-    public abstract Response verify(AbstractVerifiableRequest request, MuleContext muleContext);
+    public abstract Response verify(AbstractVerifiableRequest request,
+                                    MuleContext muleContext,
+                                    Runnable successAction);
 
     private static void attemptVerification(final AbstractVerifiableRequest request,
                                             final MuleContext muleContext)
@@ -77,8 +84,6 @@ public enum VerificationType
                 Constants.VERIFICATION_TIMEOUT_MILLIS);
 
             validateResponse(response, request, verificationChallenge);
-
-            // FIXME store validated subscription or unsubscription
         }
         catch (final URISyntaxException use)
         {
@@ -131,7 +136,12 @@ public enum VerificationType
             StringUtils.defaultString(request.getCallbackUrl().getQuery()));
 
         appendToQuery(Constants.HUB_MODE_PARAM, request.getMode(), queryBuilder);
-        appendToQuery(Constants.HUB_TOPIC_PARAM, request.getTopicUrl().toString(), queryBuilder);
+
+        for (final URI topicUrl : request.getTopicUrls())
+        {
+            appendToQuery(Constants.HUB_TOPIC_PARAM, topicUrl.toString(), queryBuilder);
+        }
+
         appendToQuery(Constants.HUB_CHALLENGE_PARAM, verificationChallenge, queryBuilder);
         appendToQuery(Constants.HUB_LEASE_SECONDS_PARAM, Long.toString(request.getLeaseSeconds()),
             queryBuilder);

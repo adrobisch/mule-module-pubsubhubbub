@@ -29,7 +29,7 @@ public abstract class AbstractVerifiableRequest implements Serializable
     private final static Log LOG = LogFactory.getLog(SubscriptionRequest.class);
 
     private final URI callbackUrl;
-    private final URI topicUrl;
+    private final List<URI> topicUrls;
     private final long expiryTime;
     private final byte[] secret;
     private final VerificationType verificationType;
@@ -38,11 +38,9 @@ public abstract class AbstractVerifiableRequest implements Serializable
     public AbstractVerifiableRequest(final MultivaluedMap<String, String> formParams)
     {
         callbackUrl = HubResource.getMandatoryUrlParameter(Constants.HUB_CALLBACK_PARAM, formParams);
-        topicUrl = HubResource.getMandatoryUrlParameter(Constants.HUB_TOPIC_PARAM, formParams);
+        topicUrls = HubResource.getMandatoryUrlParameters(Constants.HUB_TOPIC_PARAM, formParams);
         expiryTime = System.currentTimeMillis() + 1000L * retrieveLeaseSeconds(formParams);
-
         secret = getSecretAsBytes(formParams);
-
         verificationType = retrieveSubscriptionVerificationMode(formParams);
         verificationToken = formParams.getFirst(Constants.HUB_VERIFY_TOKEN_PARAM);
     }
@@ -68,6 +66,11 @@ public abstract class AbstractVerifiableRequest implements Serializable
 
     public abstract String getMode();
 
+    public long getLeaseSeconds()
+    {
+        return (expiryTime - System.currentTimeMillis()) / 1000L;
+    }
+
     @Override
     public String toString()
     {
@@ -79,14 +82,14 @@ public abstract class AbstractVerifiableRequest implements Serializable
         return callbackUrl;
     }
 
-    public URI getTopicUrl()
+    public List<URI> getTopicUrls()
     {
-        return topicUrl;
+        return topicUrls;
     }
 
-    public long getLeaseSeconds()
+    public long getExpiryTime()
     {
-        return (expiryTime - System.currentTimeMillis()) / 1000L;
+        return expiryTime;
     }
 
     public byte[] getSecret()

@@ -12,7 +12,10 @@ package org.mule.module.pubsubhubbub;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -37,6 +40,17 @@ public class HubResource
     @POST
     public Response handleRequest(final MultivaluedMap<String, String> formParams)
     {
+        for (final Entry<String, List<String>> param : formParams.entrySet())
+        {
+            if ((param.getValue().size() > 1) && (!param.getKey().equals(Constants.HUB_VERIFY_PARAM))
+                && (!param.getKey().equals(Constants.HUB_TOPIC_PARAM)))
+            {
+                throw new IllegalArgumentException("Multivalued parameters are only supported for "
+                                                   + Constants.HUB_VERIFY_PARAM + " and "
+                                                   + Constants.HUB_TOPIC_PARAM);
+            }
+        }
+
         final HubMode hubMode = HubMode.parse(getMandatoryStringParameter(Constants.HUB_MODE_PARAM,
             formParams));
 
@@ -88,6 +102,42 @@ public class HubResource
             }
 
             return uri;
+        }
+        catch (final URISyntaxException use)
+        {
+            use.printStackTrace();
+            throw new IllegalArgumentException("Invalid URL parameter: " + name, use);
+        }
+    }
+
+    public static List<URI> getMandatoryUrlParameters(final String name,
+                                                      final MultivaluedMap<String, String> formParams)
+    {
+
+        final List<String> values = formParams.get(name);
+
+        if ((values == null) || (values.isEmpty()))
+        {
+            throw new IllegalArgumentException("Missing mandatory parameter: " + name);
+        }
+
+        try
+        {
+            final List<URI> uris = new ArrayList<URI>();
+
+            for (final String value : values)
+            {
+
+                final URI uri = new URI(value);
+
+                if (StringUtils.isNotEmpty(uri.getFragment()))
+                {
+                    throw new IllegalArgumentException("Fragment found in URL parameter: " + name);
+                }
+
+                uris.add(uri);
+            }
+            return uris;
         }
         catch (final URISyntaxException use)
         {
