@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.lang.RandomStringUtils;
@@ -28,6 +29,8 @@ import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
 import org.mule.api.registry.RegistrationException;
 import org.mule.module.client.MuleClient;
+import org.mule.module.pubsubhubbub.data.DataStore;
+import org.mule.module.pubsubhubbub.data.TopicSubscription;
 import org.mule.tck.DynamicPortTestCase;
 import org.mule.transport.http.HttpConstants;
 
@@ -243,7 +246,9 @@ public class HubITCase extends DynamicPortTestCase
         for (final String hubTopic : subscriptionRequest.get("hub.topic"))
         {
             final URI hubTopicUri = new URI(hubTopic);
-            final TopicSubscription topicSubscription = dataStore.getTopicSubscription(hubTopicUri);
+            final Set<TopicSubscription> topicSubscriptions = dataStore.getTopicSubscriptions(hubTopicUri);
+            assertEquals(1, topicSubscriptions.size());
+            final TopicSubscription topicSubscription = topicSubscriptions.iterator().next();
             assertEquals(hubTopicUri, topicSubscription.getTopicUrl());
             assertEquals(new URI(callback), topicSubscription.getCallbackUrl());
             assertTrue(topicSubscription.getExpiryTime() > 0L);

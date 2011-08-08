@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 
 import org.mule.api.MuleContext;
 import org.mule.api.context.MuleContextAware;
+import org.mule.module.pubsubhubbub.data.DataStore;
 
 /**
  * Defines a handler for processing hub requests.

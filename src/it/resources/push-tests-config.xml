@@ -16,12 +16,12 @@
        
   <!-- Currently: use raw Spring Beans, Later on: specific PuSH XML elements will be created -->
   <spring:beans>
-    <spring:bean id="subscriptionStore"
-                 class="org.mule.util.store.InMemoryObjectStore" />
+    <spring:bean id="partitionedObjectStore"
+                 class="org.mule.util.store.PartitionedInMemoryObjectStore" />
                  
     <spring:bean id="dataStore"
-                 class="org.mule.module.pubsubhubbub.DataStore"
-                 p:subscriptionStore-ref="subscriptionStore" />
+                 class="org.mule.module.pubsubhubbub.data.DataStore"
+                 p:subscriptionStore-ref="partitionedObjectStore" />
                  
     <spring:bean id="hubActionHandler"
                  abstract="true"

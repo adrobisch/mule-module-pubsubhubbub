@@ -16,6 +16,8 @@ import java.util.List;
 
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.mule.module.pubsubhubbub.data.TopicSubscription;
+
 public class SubscriptionRequest extends AbstractVerifiableRequest
 {
     private static final long serialVersionUID = 1L;

@@ -8,7 +8,7 @@
  * LICENSE.txt file.
  */
 
-package org.mule.module.pubsubhubbub;
+package org.mule.module.pubsubhubbub.data;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -28,10 +28,10 @@ public class TopicSubscription implements Serializable
 
     private final byte[] secret;
 
-    protected TopicSubscription(final URI callbackUrl,
-                                final URI topicUrl,
-                                final long expiryTime,
-                                final byte[] secret)
+    public TopicSubscription(final URI callbackUrl,
+                             final URI topicUrl,
+                             final long expiryTime,
+                             final byte[] secret)
     {
         this.callbackUrl = callbackUrl;
         this.topicUrl = topicUrl;
@@ -43,6 +43,36 @@ public class TopicSubscription implements Serializable
     public String toString()
     {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+    }
+
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((callbackUrl == null) ? 0 : callbackUrl.hashCode());
+        result = prime * result + ((topicUrl == null) ? 0 : topicUrl.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj)
+    {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        final TopicSubscription other = (TopicSubscription) obj;
+        if (callbackUrl == null)
+        {
+            if (other.callbackUrl != null) return false;
+        }
+        else if (!callbackUrl.equals(other.callbackUrl)) return false;
+        if (topicUrl == null)
+        {
+            if (other.topicUrl != null) return false;
+        }
+        else if (!topicUrl.equals(other.topicUrl)) return false;
+        return true;
     }
 
     public URI getCallbackUrl()

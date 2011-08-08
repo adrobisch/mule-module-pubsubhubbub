@@ -19,3 +19,17 @@ To compile and install in the local Maven repository:
 To run the test suite:
 
     mvn -Pit verify
+    
+    
+Implementation Status
+---------------------
+
+Done:
+
+- Synchronous Subscription
+
+Pending:
+
+- Synchronous Unsubscription
+- Asynchronous Subscription and Unsubscription
+- Publisher Workflow

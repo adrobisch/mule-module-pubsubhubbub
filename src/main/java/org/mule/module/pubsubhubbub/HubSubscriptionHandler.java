@@ -13,6 +13,8 @@ package org.mule.module.pubsubhubbub;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
+import org.mule.module.pubsubhubbub.data.TopicSubscription;
+
 /**
  * Deals with subscription requests.
  */
