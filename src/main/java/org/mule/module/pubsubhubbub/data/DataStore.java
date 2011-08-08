@@ -21,7 +21,7 @@ import org.mule.api.store.PartitionableObjectStore;
 
 public class DataStore
 {
-    private static final String TOPIC_SUBSCRIPTION_CALLBACKS_DOMAIN = "TopicSubscriptionCallbacks";
+    private static final String TOPIC_SUBSCRIPTION_CALLBACKS_PARTITION = "TopicSubscriptionCallbacks";
 
     private PartitionableObjectStore<Serializable> objectStore;
 
@@ -32,48 +32,48 @@ public class DataStore
 
     public void storeTopicSubscription(final TopicSubscription subscription)
     {
-        storeInSet(subscription.getTopicUrl(), subscription, TOPIC_SUBSCRIPTION_CALLBACKS_DOMAIN);
+        storeInSet(subscription.getTopicUrl(), subscription, TOPIC_SUBSCRIPTION_CALLBACKS_PARTITION);
     }
 
     @SuppressWarnings("unchecked")
     public Set<TopicSubscription> getTopicSubscriptions(final URI topicUrl)
     {
         // TODO drop expired ones
-        return (Set<TopicSubscription>) retrieve(topicUrl, TOPIC_SUBSCRIPTION_CALLBACKS_DOMAIN);
+        return (Set<TopicSubscription>) retrieve(topicUrl, TOPIC_SUBSCRIPTION_CALLBACKS_PARTITION);
     }
 
-    private void store(final Serializable key, final Serializable domainObject, final String domain)
+    private void store(final Serializable key, final Serializable value, final String domain)
     {
         try
         {
             // not atomic :(
-            if (objectStore.contains(key))
+            if (objectStore.contains(key, domain))
             {
-                objectStore.remove(key);
+                objectStore.remove(key, domain);
             }
 
-            objectStore.store(key, domainObject, domain);
+            objectStore.store(key, value, domain);
         }
         catch (final ObjectStoreException ose)
         {
-            throw new RuntimeException("Failed to store: " + domainObject, ose);
+            throw new RuntimeException("Failed to store: " + value, ose);
         }
     }
 
-    private void storeInSet(final Serializable key, final Serializable domainObject, final String domain)
+    private void storeInSet(final Serializable key, final Serializable value, final String domain)
     {
         // not atomic :(
         @SuppressWarnings("unchecked")
-        Set<Serializable> domainObjects = (Set<Serializable>) retrieve(key, domain);
+        Set<Serializable> values = (Set<Serializable>) retrieve(key, domain);
 
-        if (domainObjects == null)
+        if (values == null)
         {
-            domainObjects = new HashSet<Serializable>();
+            values = new HashSet<Serializable>();
         }
 
-        domainObjects.add(domainObject);
+        values.add(value);
 
-        store(key, (Serializable) domainObjects, domain);
+        store(key, (Serializable) values, domain);
     }
 
     private Serializable retrieve(final Serializable key, final String domain)

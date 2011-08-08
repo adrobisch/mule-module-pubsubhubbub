@@ -152,7 +152,11 @@ public class HubITCase extends DynamicPortTestCase
         doTestSuccessfullSynchronousSubscription(extraSubscriptionParam);
     }
 
-    // TODO test re-subscription
+    public void testSuccessfullSynchronousResubscription() throws Exception
+    {
+        doTestSuccessfullSynchronousSubscription();
+        doTestSuccessfullSynchronousSubscription();
+    }
 
     // Support methods
 
