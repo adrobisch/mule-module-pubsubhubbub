@@ -44,9 +44,22 @@ public class DataStore
     @SuppressWarnings("unchecked")
     public Set<TopicSubscription> getTopicSubscriptions(final URI topicUrl)
     {
-        // TODO drop expired ones
-        return (Set<TopicSubscription>) retrieve(topicUrl, TOPIC_SUBSCRIPTION_CALLBACKS_PARTITION,
-            (Serializable) Collections.EMPTY_SET);
+        final Set<TopicSubscription> result = new HashSet<TopicSubscription>();
+
+        for (final TopicSubscription topicSubscription : (Set<TopicSubscription>) retrieve(topicUrl,
+            TOPIC_SUBSCRIPTION_CALLBACKS_PARTITION, (Serializable) Collections.EMPTY_SET))
+        {
+            if (topicSubscription.isExpired())
+            {
+                removeTopicSubscription(topicSubscription);
+            }
+            else
+            {
+                result.add(topicSubscription);
+            }
+        }
+
+        return result;
     }
 
     private void store(final Serializable key, final Serializable value, final String domain)

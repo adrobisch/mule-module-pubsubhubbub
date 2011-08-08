@@ -14,6 +14,7 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.core.MultivaluedMap;
 
@@ -44,7 +45,7 @@ public abstract class AbstractVerifiableRequest implements Serializable
     {
         callbackUrl = HubResource.getMandatoryUrlParameter(Constants.HUB_CALLBACK_PARAM, formParams);
         topicUrls = HubResource.getMandatoryUrlParameters(Constants.HUB_TOPIC_PARAM, formParams);
-        expiryTime = System.currentTimeMillis() + 1000L * retrieveLeaseSeconds(formParams);
+        expiryTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(retrieveLeaseSeconds(formParams));
         secret = getSecretAsBytes(formParams);
         verificationType = retrieveSubscriptionVerificationMode(formParams);
         verificationToken = formParams.getFirst(Constants.HUB_VERIFY_TOKEN_PARAM);
@@ -72,7 +73,7 @@ public abstract class AbstractVerifiableRequest implements Serializable
 
     public long getLeaseSeconds()
     {
-        return (expiryTime - System.currentTimeMillis()) / 1000L;
+        return TimeUnit.MILLISECONDS.toSeconds(expiryTime - System.currentTimeMillis());
     }
 
     @Override

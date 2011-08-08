@@ -39,6 +39,11 @@ public class TopicSubscription implements Serializable
         this.secret = secret;
     }
 
+    public boolean isExpired()
+    {
+        return System.currentTimeMillis() >= expiryTime;
+    }
+
     @Override
     public String toString()
     {
