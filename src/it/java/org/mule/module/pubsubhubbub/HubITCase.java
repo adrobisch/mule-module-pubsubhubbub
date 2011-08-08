@@ -37,20 +37,18 @@ import org.mule.transport.http.HttpConstants;
 public class HubITCase extends DynamicPortTestCase
 {
     private static final String TEST_TOPIC = "http://mulesoft.org/fake-topic";
-    private static final URI TEST_TOPIC_URI;
-    static
-    {
-        try
-        {
-            TEST_TOPIC_URI = new URI(TEST_TOPIC);
-        }
-        catch (final URISyntaxException urise)
-        {
-            throw new RuntimeException(urise);
-        }
-    }
 
     private MuleClient muleClient;
+
+    private enum Action
+    {
+        SUBSCRIBE, UNSUBSCRIBE;
+
+        String asHubMode()
+        {
+            return this.toString().toLowerCase();
+        }
+    };
 
     @Override
     protected void doSetUp() throws Exception
@@ -71,7 +69,7 @@ public class HubITCase extends DynamicPortTestCase
         return "push-tests-config.xml";
     }
 
-    public void testBadHubRequest() throws Exception
+    public void testUnknownHubModeRequest() throws Exception
     {
         final Map<String, String> subscriptionRequest = new HashMap<String, String>();
         subscriptionRequest.put("hub.mode", "foo");
@@ -79,6 +77,17 @@ public class HubITCase extends DynamicPortTestCase
         final MuleMessage response = wrapAndSendRequestToHub(subscriptionRequest);
         assertEquals("400", response.getInboundProperty("http.status"));
         assertEquals("Unsupported hub mode: foo", response.getPayloadAsString());
+    }
+
+    public void testWrongMultivaluedRequest() throws Exception
+    {
+        final Map<String, List<String>> subscriptionRequest = new HashMap<String, List<String>>();
+        subscriptionRequest.put("hub.mode", Arrays.asList("subscribe", "unsubscribe"));
+
+        final MuleMessage response = sendRequestToHub(subscriptionRequest);
+        assertEquals("400", response.getInboundProperty("http.status"));
+        assertEquals("Multivalued parameters are only supported for: hub.verify,hub.topic",
+            response.getPayloadAsString());
     }
 
     public void testBadSubscriptionRequest() throws Exception
@@ -95,7 +104,6 @@ public class HubITCase extends DynamicPortTestCase
     public void testSubscriptionRequestWithTooBigASecret() throws Exception
     {
         final Map<String, String> subscriptionRequest = new HashMap<String, String>();
-        subscriptionRequest.put("hub.mode", "subscribe");
         subscriptionRequest.put("hub.mode", "subscribe");
         subscriptionRequest.put("hub.callback", "http://localhost:" + getSubscriberCallbacksPort()
                                                 + "/cb-failure");
@@ -123,68 +131,77 @@ public class HubITCase extends DynamicPortTestCase
 
     public void testSuccessfullSynchronousSubscription() throws Exception
     {
-        doTestSuccessfullSynchronousSubscription();
+        doTestSuccessfullSynchronousVerifiableAction(Action.SUBSCRIBE);
     }
 
     public void testSuccessfullSynchronousSubscriptionWithVerifyToken() throws Exception
     {
         final Map<String, List<String>> extraSubscriptionParam = Collections.singletonMap("hub.verify_token",
             Collections.singletonList(RandomStringUtils.randomAlphanumeric(20)));
-        doTestSuccessfullSynchronousSubscription(extraSubscriptionParam);
+        doTestSuccessfullSynchronousVerifiableAction(Action.SUBSCRIBE, extraSubscriptionParam);
     }
 
     public void testSuccessfullSynchronousSubscriptionWithQueryParamInCallback() throws Exception
     {
-        doTestSuccessfullSynchronousSubscription("?foo=bar");
+        doTestSuccessfullSynchronousVerifiableAction(Action.SUBSCRIBE, "?foo=bar");
     }
 
     public void testSuccessfullSynchronousSubscriptionWithSecret() throws Exception
     {
         final Map<String, List<String>> extraSubscriptionParam = Collections.singletonMap("hub.secret",
             Collections.singletonList(RandomStringUtils.randomAlphanumeric(20)));
-        doTestSuccessfullSynchronousSubscription(extraSubscriptionParam);
+        doTestSuccessfullSynchronousVerifiableAction(Action.SUBSCRIBE, extraSubscriptionParam);
     }
 
     public void testSuccessfullSynchronousMultiTopicsSubscription() throws Exception
     {
         final Map<String, List<String>> extraSubscriptionParam = Collections.singletonMap("hub.topic",
             Arrays.asList("http://mulesoft.org/faketopic1", "http://mulesoft.org/faketopic2"));
-        doTestSuccessfullSynchronousSubscription(extraSubscriptionParam);
+        doTestSuccessfullSynchronousVerifiableAction(Action.SUBSCRIBE, extraSubscriptionParam);
     }
 
     public void testSuccessfullSynchronousResubscription() throws Exception
     {
-        doTestSuccessfullSynchronousSubscription();
-        doTestSuccessfullSynchronousSubscription();
+        doTestSuccessfullSynchronousVerifiableAction(Action.SUBSCRIBE);
+        doTestSuccessfullSynchronousVerifiableAction(Action.SUBSCRIBE);
+    }
+
+    public void testSuccessfullSynchronousUnsubscription() throws Exception
+    {
+        doTestSuccessfullSynchronousVerifiableAction(Action.SUBSCRIBE);
+        doTestSuccessfullSynchronousVerifiableAction(Action.UNSUBSCRIBE);
     }
 
     // Support methods
 
-    private void doTestSuccessfullSynchronousSubscription() throws Exception
+    private void doTestSuccessfullSynchronousVerifiableAction(final Action action) throws Exception
     {
-        doTestSuccessfullSynchronousSubscription("");
+        doTestSuccessfullSynchronousVerifiableAction(action, "");
     }
 
-    private void doTestSuccessfullSynchronousSubscription(final Map<String, List<String>> extraSubscriptionParam)
+    private void doTestSuccessfullSynchronousVerifiableAction(final Action action,
+                                                              final Map<String, List<String>> extraSubscriptionParam)
         throws Exception
     {
-        dotestSuccessfullSynchronousSubscription(extraSubscriptionParam, "");
+        doTestSuccessfullSynchronousVerifiableAction(action, extraSubscriptionParam, "");
     }
 
     @SuppressWarnings("unchecked")
-    private void doTestSuccessfullSynchronousSubscription(final String callbackQuery) throws Exception
+    private void doTestSuccessfullSynchronousVerifiableAction(final Action action, final String callbackQuery)
+        throws Exception
     {
-        dotestSuccessfullSynchronousSubscription(Collections.EMPTY_MAP, callbackQuery);
+        doTestSuccessfullSynchronousVerifiableAction(action, Collections.EMPTY_MAP, callbackQuery);
     }
 
-    private void dotestSuccessfullSynchronousSubscription(final Map<String, List<String>> extraSubscriptionParam,
-                                                          final String callbackQuery) throws Exception
+    private void doTestSuccessfullSynchronousVerifiableAction(final Action action,
+                                                              final Map<String, List<String>> extraSubscriptionParam,
+                                                              final String callbackQuery) throws Exception
     {
         final String callback = "http://localhost:" + getSubscriberCallbacksPort() + "/cb-success"
                                 + callbackQuery;
 
         final Map<String, List<String>> subscriptionRequest = new HashMap<String, List<String>>();
-        subscriptionRequest.put("hub.mode", Collections.singletonList("subscribe"));
+        subscriptionRequest.put("hub.mode", Collections.singletonList(action.asHubMode()));
         subscriptionRequest.put("hub.callback", Collections.singletonList(callback));
         subscriptionRequest.put("hub.topic", Collections.singletonList(TEST_TOPIC));
         subscriptionRequest.put("hub.verify", Collections.singletonList("sync"));
@@ -195,7 +212,20 @@ public class HubITCase extends DynamicPortTestCase
         assertEquals("204", response.getInboundProperty("http.status"));
 
         checkVerificationMessage(callbackQuery, subscriptionRequest);
-        checkTopicSubscriptionStored(callback, subscriptionRequest);
+
+        switch (action)
+        {
+            case SUBSCRIBE :
+                checkTopicSubscriptionStored(callback, subscriptionRequest);
+                break;
+
+            case UNSUBSCRIBE :
+                checkTopicSubscriptionCleared(callback, subscriptionRequest);
+                break;
+
+            default :
+                throw new UnsupportedOperationException("no store check for action: " + action);
+        }
     }
 
     private void checkVerificationMessage(final String callbackQuery,
@@ -205,7 +235,8 @@ public class HubITCase extends DynamicPortTestCase
         final Map<String, List<String>> subscriberVerifyParams = TestUtils.getUrlParameters(getFunctionalTestComponent(
             "successfullSubscriberCallback").getLastReceivedMessage().toString());
 
-        assertEquals("subscribe", subscriberVerifyParams.get("hub.mode").get(0));
+        assertEquals(subscriptionRequest.get("hub.mode").get(0), subscriberVerifyParams.get("hub.mode")
+            .get(0));
         assertTrue(StringUtils.isNotBlank(subscriberVerifyParams.get("hub.challenge").get(0)));
         assertTrue(NumberUtils.isDigits(subscriberVerifyParams.get("hub.lease_seconds").get(0)));
 
@@ -269,6 +300,19 @@ public class HubITCase extends DynamicPortTestCase
             {
                 assertNull(topicSubscription.getSecret());
             }
+        }
+    }
+
+    private void checkTopicSubscriptionCleared(final String callback,
+                                               final Map<String, List<String>> subscriptionRequest)
+        throws RegistrationException, URISyntaxException, UnsupportedEncodingException
+    {
+        final DataStore dataStore = muleContext.getRegistry().lookupObject(DataStore.class);
+        for (final String hubTopic : subscriptionRequest.get("hub.topic"))
+        {
+            final URI hubTopicUri = new URI(hubTopic);
+            final Set<TopicSubscription> topicSubscriptions = dataStore.getTopicSubscriptions(hubTopicUri);
+            assertEquals(0, topicSubscriptions.size());
         }
     }
 

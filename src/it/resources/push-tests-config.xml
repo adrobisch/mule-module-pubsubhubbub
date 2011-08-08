@@ -21,7 +21,7 @@
                  
     <spring:bean id="dataStore"
                  class="org.mule.module.pubsubhubbub.data.DataStore"
-                 p:subscriptionStore-ref="partitionedObjectStore" />
+                 p:objectStore-ref="partitionedObjectStore" />
                  
     <spring:bean id="hubActionHandler"
                  abstract="true"
@@ -29,10 +29,17 @@
                  
     <spring:bean id="subscriptionHandler"
                  parent="hubActionHandler"
-                 class="org.mule.module.pubsubhubbub.HubSubscriptionHandler" />
+                 class="org.mule.module.pubsubhubbub.handler.SubscriptionHandler" />
+                 
+    <spring:bean id="unsubscriptionHandler"
+                 parent="hubActionHandler"
+                 class="org.mule.module.pubsubhubbub.handler.UnsubscriptionHandler" />
                  
     <util:map id="handlers">
-        <spring:entry key="#{T(org.mule.module.pubsubhubbub.HubMode).SUBSCRIBE}" value-ref="subscriptionHandler" />
+        <spring:entry key="#{T(org.mule.module.pubsubhubbub.HubMode).SUBSCRIBE}"
+                      value-ref="subscriptionHandler" />
+        <spring:entry key="#{T(org.mule.module.pubsubhubbub.HubMode).UNSUBSCRIBE}"
+                      value-ref="unsubscriptionHandler" />
     </util:map>
   
     <spring:bean id="hubResource"

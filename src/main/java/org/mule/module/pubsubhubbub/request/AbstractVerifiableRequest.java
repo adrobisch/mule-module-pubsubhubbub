@@ -8,10 +8,11 @@
  * LICENSE.txt file.
  */
 
-package org.mule.module.pubsubhubbub;
+package org.mule.module.pubsubhubbub.request;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -21,6 +22,10 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mule.module.pubsubhubbub.Constants;
+import org.mule.module.pubsubhubbub.HubResource;
+import org.mule.module.pubsubhubbub.VerificationType;
+import org.mule.module.pubsubhubbub.data.TopicSubscription;
 
 public abstract class AbstractVerifiableRequest implements Serializable
 {
@@ -142,5 +147,17 @@ public abstract class AbstractVerifiableRequest implements Serializable
 
         throw new IllegalArgumentException("No supported value found for parameter: "
                                            + Constants.HUB_VERIFY_PARAM);
+    }
+
+    public List<TopicSubscription> getTopicSubscriptions()
+    {
+        final List<TopicSubscription> subscriptions = new ArrayList<TopicSubscription>();
+    
+        for (final URI topicUrl : getTopicUrls())
+        {
+            subscriptions.add(new TopicSubscription(getCallbackUrl(), topicUrl, getExpiryTime(), getSecret()));
+        }
+    
+        return subscriptions;
     }
 }

@@ -12,6 +12,7 @@ package org.mule.module.pubsubhubbub.data;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,7 +26,7 @@ public class DataStore
 
     private PartitionableObjectStore<Serializable> objectStore;
 
-    public void setSubscriptionStore(final PartitionableObjectStore<Serializable> objectStore)
+    public void setObjectStore(final PartitionableObjectStore<Serializable> objectStore)
     {
         this.objectStore = objectStore;
     }
@@ -35,11 +36,17 @@ public class DataStore
         storeInSet(subscription.getTopicUrl(), subscription, TOPIC_SUBSCRIPTION_CALLBACKS_PARTITION);
     }
 
+    public void removeTopicSubscription(final TopicSubscription subscription)
+    {
+        removeFromSet(subscription.getTopicUrl(), subscription, TOPIC_SUBSCRIPTION_CALLBACKS_PARTITION);
+    }
+
     @SuppressWarnings("unchecked")
     public Set<TopicSubscription> getTopicSubscriptions(final URI topicUrl)
     {
         // TODO drop expired ones
-        return (Set<TopicSubscription>) retrieve(topicUrl, TOPIC_SUBSCRIPTION_CALLBACKS_PARTITION);
+        return (Set<TopicSubscription>) retrieve(topicUrl, TOPIC_SUBSCRIPTION_CALLBACKS_PARTITION,
+            (Serializable) Collections.EMPTY_SET);
     }
 
     private void store(final Serializable key, final Serializable value, final String domain)
@@ -64,7 +71,7 @@ public class DataStore
     {
         // not atomic :(
         @SuppressWarnings("unchecked")
-        Set<Serializable> values = (Set<Serializable>) retrieve(key, domain);
+        Set<Serializable> values = (Set<Serializable>) retrieve(key, domain, null);
 
         if (values == null)
         {
@@ -76,7 +83,24 @@ public class DataStore
         store(key, (Serializable) values, domain);
     }
 
-    private Serializable retrieve(final Serializable key, final String domain)
+    private void removeFromSet(final Serializable key, final Serializable value, final String domain)
+    {
+        // not atomic :(
+        @SuppressWarnings("unchecked")
+        final Set<Serializable> values = (Set<Serializable>) retrieve(key, domain,
+            (Serializable) Collections.EMPTY_SET);
+
+        if (values.isEmpty())
+        {
+            return;
+        }
+
+        values.remove(value);
+
+        store(key, (Serializable) values, domain);
+    }
+
+    private Serializable retrieve(final Serializable key, final String domain, final Serializable defaultValue)
     {
         try
         {
@@ -84,7 +108,7 @@ public class DataStore
         }
         catch (final ObjectDoesNotExistException odnee)
         {
-            return null;
+            return defaultValue;
         }
         catch (final ObjectStoreException ose)
         {

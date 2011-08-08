@@ -8,7 +8,7 @@
  * LICENSE.txt file.
  */
 
-package org.mule.module.pubsubhubbub;
+package org.mule.module.pubsubhubbub.handler;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;

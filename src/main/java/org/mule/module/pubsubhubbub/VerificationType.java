@@ -24,6 +24,7 @@ import org.mule.api.MuleContext;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
 import org.mule.module.client.MuleClient;
+import org.mule.module.pubsubhubbub.request.AbstractVerifiableRequest;
 
 public enum VerificationType
 {

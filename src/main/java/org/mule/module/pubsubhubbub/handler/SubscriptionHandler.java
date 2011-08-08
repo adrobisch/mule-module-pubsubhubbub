@@ -8,22 +8,24 @@
  * LICENSE.txt file.
  */
 
-package org.mule.module.pubsubhubbub;
+package org.mule.module.pubsubhubbub.handler;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.mule.module.pubsubhubbub.data.TopicSubscription;
+import org.mule.module.pubsubhubbub.request.AbstractVerifiableRequest;
+import org.mule.module.pubsubhubbub.request.SubscriptionRequest;
 
 /**
  * Deals with subscription requests.
  */
-public class HubSubscriptionHandler extends AbstractHubActionHandler
+public class SubscriptionHandler extends AbstractHubActionHandler
 {
     @Override
     public Response handle(final MultivaluedMap<String, String> formParams)
     {
-        final SubscriptionRequest subscriptionRequest = new SubscriptionRequest(formParams);
+        final AbstractVerifiableRequest subscriptionRequest = new SubscriptionRequest(formParams);
         return subscriptionRequest.getVerificationType().verify(subscriptionRequest, getMuleContext(),
             new Runnable()
             {

@@ -26,6 +26,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
+import org.mule.module.pubsubhubbub.handler.AbstractHubActionHandler;
 
 /**
  * Resource that is the main entry point to the hub.
@@ -45,9 +46,10 @@ public class HubResource
             if ((param.getValue().size() > 1) && (!param.getKey().equals(Constants.HUB_VERIFY_PARAM))
                 && (!param.getKey().equals(Constants.HUB_TOPIC_PARAM)))
             {
-                throw new IllegalArgumentException("Multivalued parameters are only supported for "
-                                                   + Constants.HUB_VERIFY_PARAM + " and "
-                                                   + Constants.HUB_TOPIC_PARAM);
+                throw new IllegalArgumentException("Multivalued parameters are only supported for: "
+                                                   + StringUtils.join(
+                                                       new String[]{Constants.HUB_VERIFY_PARAM,
+                                                           Constants.HUB_TOPIC_PARAM}, ','));
             }
         }
 

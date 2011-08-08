@@ -15,8 +15,13 @@ import java.util.concurrent.TimeUnit;
 
 public class Constants
 {
+    public static final Charset UTF8_ENCODING = Charset.forName("UTF-8");
+
     // TODO make this configurable on the hub
-    public static long DEFAULT_LEASE_SECONDS = TimeUnit.DAYS.toSeconds(7);
+    public static final long DEFAULT_LEASE_SECONDS = TimeUnit.DAYS.toSeconds(7);
+    public static final long VERIFICATION_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(15L);
+
+    public static final int MAXIMUM_SECRET_SIZE = 200;
 
     // Common Parameters
     // Mandatory
@@ -32,10 +37,4 @@ public class Constants
     public static final String HUB_LEASE_SECONDS_PARAM = "hub.lease_seconds";
     public static final String HUB_SECRET_PARAM = "hub.secret";
     public static final String HUB_VERIFY_TOKEN_PARAM = "hub.verify_token";
-
-    public static final long VERIFICATION_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(15L);
-
-    static final Charset UTF8_ENCODING = Charset.forName("UTF-8");
-
-    public static final int MAXIMUM_SECRET_SIZE = 200;
 }

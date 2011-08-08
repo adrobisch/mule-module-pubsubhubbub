@@ -8,15 +8,12 @@
  * LICENSE.txt file.
  */
 
-package org.mule.module.pubsubhubbub;
+package org.mule.module.pubsubhubbub.request;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.ws.rs.core.MultivaluedMap;
 
-import org.mule.module.pubsubhubbub.data.TopicSubscription;
+import org.mule.module.pubsubhubbub.HubMode;
 
 public class SubscriptionRequest extends AbstractVerifiableRequest
 {
@@ -31,17 +28,5 @@ public class SubscriptionRequest extends AbstractVerifiableRequest
     public String getMode()
     {
         return HubMode.SUBSCRIBE.getMode();
-    }
-
-    public List<TopicSubscription> getTopicSubscriptions()
-    {
-        final List<TopicSubscription> subscriptions = new ArrayList<TopicSubscription>();
-
-        for (final URI topicUrl : getTopicUrls())
-        {
-            subscriptions.add(new TopicSubscription(getCallbackUrl(), topicUrl, getExpiryTime(), getSecret()));
-        }
-
-        return subscriptions;
     }
 }

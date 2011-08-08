@@ -8,9 +8,11 @@
  * LICENSE.txt file.
  */
 
-package org.mule.module.pubsubhubbub;
+package org.mule.module.pubsubhubbub.request;
 
 import javax.ws.rs.core.MultivaluedMap;
+
+import org.mule.module.pubsubhubbub.HubMode;
 
 public class UnsubscriptionRequest extends AbstractVerifiableRequest
 {
