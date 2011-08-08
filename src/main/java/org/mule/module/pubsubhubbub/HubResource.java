@@ -129,6 +129,10 @@ public class HubResource
 
             for (final String value : values)
             {
+                if (StringUtils.isBlank(value))
+                {
+                    continue;
+                }
 
                 final URI uri = new URI(value);
 
@@ -139,6 +143,12 @@ public class HubResource
 
                 uris.add(uri);
             }
+
+            if (uris.isEmpty())
+            {
+                throw new IllegalArgumentException("No value found for: " + name);
+            }
+
             return uris;
         }
         catch (final URISyntaxException use)

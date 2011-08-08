@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Constants
 {
+    // TODO encoding should come from the request and not assume utf-8
     public static final Charset UTF8_ENCODING = Charset.forName("UTF-8");
 
     // TODO make this configurable on the hub

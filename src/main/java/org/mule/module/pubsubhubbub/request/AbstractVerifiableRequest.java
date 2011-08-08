@@ -59,7 +59,6 @@ public abstract class AbstractVerifiableRequest implements Serializable
             return null;
         }
 
-        // TODO improve as encoding should come from the request and not assume utf-8
         final byte[] secretAsBytes = secretAsString.getBytes(Constants.UTF8_ENCODING);
         if (secretAsBytes.length >= Constants.MAXIMUM_SECRET_SIZE)
         {
@@ -152,12 +151,12 @@ public abstract class AbstractVerifiableRequest implements Serializable
     public List<TopicSubscription> getTopicSubscriptions()
     {
         final List<TopicSubscription> subscriptions = new ArrayList<TopicSubscription>();
-    
+
         for (final URI topicUrl : getTopicUrls())
         {
             subscriptions.add(new TopicSubscription(getCallbackUrl(), topicUrl, getExpiryTime(), getSecret()));
         }
-    
+
         return subscriptions;
     }
 }
