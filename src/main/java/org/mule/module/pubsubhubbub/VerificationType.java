@@ -23,7 +23,10 @@ import org.apache.commons.logging.LogFactory;
 import org.mule.api.MuleContext;
 import org.mule.api.MuleException;
 import org.mule.api.MuleMessage;
+import org.mule.api.retry.RetryCallback;
+import org.mule.api.retry.RetryContext;
 import org.mule.module.client.MuleClient;
+import org.mule.module.pubsubhubbub.handler.AbstractHubActionHandler;
 import org.mule.module.pubsubhubbub.request.AbstractVerifiableRequest;
 
 public enum VerificationType
@@ -32,11 +35,11 @@ public enum VerificationType
     {
         @Override
         public Response verify(final AbstractVerifiableRequest request,
-                               final MuleContext muleContext,
+                               final AbstractHubActionHandler hubActionHandler,
                                final Runnable successAction)
         {
 
-            attemptVerification(request, muleContext);
+            attemptVerification(request, hubActionHandler.getMuleContext());
             successAction.run();
             return Response.noContent().build();
         }
@@ -45,12 +48,37 @@ public enum VerificationType
     {
         @Override
         public Response verify(final AbstractVerifiableRequest request,
-                               final MuleContext muleContext,
+                               final AbstractHubActionHandler hubActionHandler,
                                final Runnable successAction)
         {
-            // FIXME implement asynchronous verification (the following is obviously sync)
-            attemptVerification(request, muleContext);
-            successAction.run();
+            final RetryCallback callback = new RetryCallback()
+            {
+
+                @Override
+                public String getWorkDescription()
+                {
+                    return "Attempting verification of: " + request;
+                }
+
+                @Override
+                public void doWork(final RetryContext context) throws Exception
+                {
+                    attemptVerification(request, hubActionHandler.getMuleContext());
+                    successAction.run();
+                }
+            };
+
+            try
+            {
+                hubActionHandler.getRetryPolicyTemplate().execute(callback,
+                    hubActionHandler.getMuleContext().getWorkManager());
+            }
+            catch (final Exception e)
+            {
+                throw new RuntimeException("Failed to schedule asynchronous execution of verification of: "
+                                           + request);
+            }
+
             return Response.status(Status.ACCEPTED).build();
         }
     };
@@ -71,7 +99,7 @@ public enum VerificationType
     }
 
     public abstract Response verify(AbstractVerifiableRequest request,
-                                    MuleContext muleContext,
+                                    AbstractHubActionHandler hubActionHandler,
                                     Runnable successAction);
 
     private static void attemptVerification(final AbstractVerifiableRequest request,

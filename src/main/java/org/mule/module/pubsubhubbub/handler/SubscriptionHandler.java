@@ -26,17 +26,16 @@ public class SubscriptionHandler extends AbstractHubActionHandler
     public Response handle(final MultivaluedMap<String, String> formParams)
     {
         final AbstractVerifiableRequest subscriptionRequest = new SubscriptionRequest(formParams);
-        return subscriptionRequest.getVerificationType().verify(subscriptionRequest, getMuleContext(),
-            new Runnable()
+        return subscriptionRequest.getVerificationType().verify(subscriptionRequest, this, new Runnable()
+        {
+            @Override
+            public void run()
             {
-                @Override
-                public void run()
+                for (final TopicSubscription topicSubscription : subscriptionRequest.getTopicSubscriptions())
                 {
-                    for (final TopicSubscription topicSubscription : subscriptionRequest.getTopicSubscriptions())
-                    {
-                        getDataStore().storeTopicSubscription(topicSubscription);
-                    }
+                    getDataStore().storeTopicSubscription(topicSubscription);
                 }
-            });
+            }
+        });
     }
 }

@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response;
 
 import org.mule.api.MuleContext;
 import org.mule.api.context.MuleContextAware;
+import org.mule.api.retry.RetryPolicyTemplate;
 import org.mule.module.pubsubhubbub.data.DataStore;
 
 /**
@@ -26,12 +27,14 @@ public abstract class AbstractHubActionHandler implements MuleContextAware
 
     private DataStore dataStore;
 
+    private RetryPolicyTemplate retryPolicyTemplate;
+
     public void setMuleContext(final MuleContext muleContext)
     {
         this.muleContext = muleContext;
     }
 
-    protected MuleContext getMuleContext()
+    public MuleContext getMuleContext()
     {
         return muleContext;
     }
@@ -44,6 +47,16 @@ public abstract class AbstractHubActionHandler implements MuleContextAware
     public DataStore getDataStore()
     {
         return dataStore;
+    }
+
+    public void setRetryPolicyTemplate(final RetryPolicyTemplate retryPolicyTemplate)
+    {
+        this.retryPolicyTemplate = retryPolicyTemplate;
+    }
+
+    public RetryPolicyTemplate getRetryPolicyTemplate()
+    {
+        return retryPolicyTemplate;
     }
 
     public abstract Response handle(final MultivaluedMap<String, String> formParams);

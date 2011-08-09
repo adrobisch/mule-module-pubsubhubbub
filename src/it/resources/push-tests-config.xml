@@ -23,9 +23,21 @@
                  class="org.mule.module.pubsubhubbub.data.DataStore"
                  p:objectStore-ref="partitionedObjectStore" />
                  
+    <spring:bean id="retryPolicyTemplate"
+                 class="org.mule.retry.async.AsynchronousRetryTemplate">
+        <spring:constructor-arg>
+            <spring:bean class="org.mule.retry.policies.SimpleRetryPolicyTemplate">
+                <!-- retry 12 times every 5 minutes-->
+                <spring:constructor-arg index="0" value="300000" />
+                <spring:constructor-arg index="1" value="12" />
+            </spring:bean>
+        </spring:constructor-arg>
+    </spring:bean>
+                 
     <spring:bean id="hubActionHandler"
                  abstract="true"
-                 p:dataStore-ref="dataStore" />
+                 p:dataStore-ref="dataStore"
+                 p:retryPolicyTemplate-ref="retryPolicyTemplate" />
                  
     <spring:bean id="subscriptionHandler"
                  parent="hubActionHandler"

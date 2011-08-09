@@ -26,17 +26,16 @@ public class UnsubscriptionHandler extends AbstractHubActionHandler
     public Response handle(final MultivaluedMap<String, String> formParams)
     {
         final AbstractVerifiableRequest unsubscriptionRequest = new UnsubscriptionRequest(formParams);
-        return unsubscriptionRequest.getVerificationType().verify(unsubscriptionRequest, getMuleContext(),
-            new Runnable()
+        return unsubscriptionRequest.getVerificationType().verify(unsubscriptionRequest, this, new Runnable()
+        {
+            @Override
+            public void run()
             {
-                @Override
-                public void run()
+                for (final TopicSubscription topicSubscription : unsubscriptionRequest.getTopicSubscriptions())
                 {
-                    for (final TopicSubscription topicSubscription : unsubscriptionRequest.getTopicSubscriptions())
-                    {
-                        getDataStore().removeTopicSubscription(topicSubscription);
-                    }
+                    getDataStore().removeTopicSubscription(topicSubscription);
                 }
-            });
+            }
+        });
     }
 }
