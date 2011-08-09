@@ -27,9 +27,9 @@ Implementation Status
 Done:
 
 - Synchronous Subscription
+- Synchronous Unsubscription
+- Asynchronous Subscription and Unsubscription
 
 Pending:
 
-- Synchronous Unsubscription
-- Asynchronous Subscription and Unsubscription
-- Publisher Workflow
+- Publisher Support
