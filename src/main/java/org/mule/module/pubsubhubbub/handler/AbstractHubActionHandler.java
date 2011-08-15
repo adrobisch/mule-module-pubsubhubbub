@@ -13,6 +13,8 @@ package org.mule.module.pubsubhubbub.handler;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mule.api.MuleContext;
 import org.mule.api.context.MuleContextAware;
 import org.mule.api.retry.RetryPolicyTemplate;
@@ -23,11 +25,13 @@ import org.mule.module.pubsubhubbub.data.DataStore;
  */
 public abstract class AbstractHubActionHandler implements MuleContextAware
 {
+    private final Log logger = LogFactory.getLog(getClass());
+
     private MuleContext muleContext;
 
     private DataStore dataStore;
 
-    // TODO support different retry policies for subsciption and publication workflows
+    // TODO support different retry policies for subscription and publication workflows
     private RetryPolicyTemplate retryPolicyTemplate;
 
     public void setMuleContext(final MuleContext muleContext)
@@ -38,6 +42,11 @@ public abstract class AbstractHubActionHandler implements MuleContextAware
     public MuleContext getMuleContext()
     {
         return muleContext;
+    }
+
+    public Log getLogger()
+    {
+        return logger;
     }
 
     public void setDataStore(final DataStore dataStore)

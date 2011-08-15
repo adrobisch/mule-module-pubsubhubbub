@@ -34,6 +34,7 @@ public class SubscriptionHandler extends AbstractHubActionHandler
                 for (final TopicSubscription topicSubscription : subscriptionRequest.getTopicSubscriptions())
                 {
                     getDataStore().storeTopicSubscription(topicSubscription);
+                    getLogger().info("Subscribed: " + topicSubscription);
                 }
             }
         });

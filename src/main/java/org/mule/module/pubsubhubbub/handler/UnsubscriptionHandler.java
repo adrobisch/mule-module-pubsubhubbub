@@ -34,6 +34,7 @@ public class UnsubscriptionHandler extends AbstractHubActionHandler
                 for (final TopicSubscription topicSubscription : unsubscriptionRequest.getTopicSubscriptions())
                 {
                     getDataStore().removeTopicSubscription(topicSubscription);
+                    getLogger().info("Unsubscribed: " + topicSubscription);
                 }
             }
         });

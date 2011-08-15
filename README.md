@@ -26,10 +26,25 @@ Implementation Status
 
 Done:
 
-- Synchronous Subscription
-- Synchronous Unsubscription
-- Asynchronous Subscription and Unsubscription
+- Subscription with Synchronous and Asynchronous Verification
+- Unsubscription with Synchronous and Asynchronous Verification
 
 Pending:
 
-- Publisher Support
+- New Content Notification
+- Content Fetch
+- Content Distribution
+- Authenticated Content Distribution
+- Number of subscribers in user agent (including support of X-Hub-On-Behalf-Of)
+
+Not Supported:
+
+- Aggregated Content Distribution
+
+    
+Know Limitations
+----------------
+
+- Default lease length is fixed to 1 week
+- Verification request time-out if fixed to 15 seconds
+- The same retry policy is used for un/subscription verification, content fetch and delivery attempts

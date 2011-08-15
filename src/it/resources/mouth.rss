@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" media="screen" href="/~d/styles/rss2full.xsl"?><?xml-stylesheet type="text/css" media="screen" href="http://feeds.feedburner.com/~d/styles/itemcontent.css"?><rss xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:wfw="http://wellformedweb.org/CommentAPI/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:sy="http://purl.org/rss/1.0/modules/syndication/" xmlns:slash="http://purl.org/rss/1.0/modules/slash/" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:media="http://search.yahoo.com/mrss/" xmlns:feedburner="http://rssnamespace.org/feedburner/ext/1.0" version="2.0">
+
+<channel>
+	<title>From the Mule’s Mouth</title>
+	
+	<link>http://blogs.mulesoft.org</link>
+	<description>Musings from the MuleSoft Experts</description>
+	<lastBuildDate>Fri, 12 Aug 2011 06:25:22 +0000</lastBuildDate>
+	<language>en</language>
+	<sy:updatePeriod>hourly</sy:updatePeriod>
+	<sy:updateFrequency>1</sy:updateFrequency>
+	<generator>http://wordpress.org/?v=3.1</generator>
+	<!-- podcast_generator="podPress/8.8.9.2" -->
+	<copyright>2006-2008 </copyright>
+	<managingEditor>webmaster@mulesoft.com (From the Mule’s Mouth)</managingEditor>
+	<webMaster>webmaster@mulesoft.com (From the Mule’s Mouth)</webMaster>
+	<ttl>1440</ttl>
+	<image>
+		<url>http://blog.mulesource.org/wp-content/uploads/2008/11/mulecast-icon.gif</url>
+		<title>From the Mule’s Mouth</title>
+		<link>http://blogs.mulesoft.org</link>
+		<width>144</width>
+		<height>144</height>
+	</image>
+	<itunes:subtitle />
+	<itunes:summary>Musings from the MuleSource Experts</itunes:summary>
+	<itunes:keywords />
+	<itunes:category text="Technology">
+		<itunes:category text="Software How-To" />
+	</itunes:category>
+	<itunes:category text="Technology" />
+	<itunes:author>From the Mule’s Mouth</itunes:author>
+	<itunes:owner>
+		<itunes:name>From the Mule’s Mouth</itunes:name>
+		<itunes:email>webmaster@mulesoft.com</itunes:email>
+	</itunes:owner>
+	<itunes:block>no</itunes:block>
+	<itunes:explicit>no</itunes:explicit>
+	<itunes:image href="http://blog.mulesource.org/wp-content/uploads/2008/11/mulecast-icon.gif" />
+		<atom10:link xmlns:atom10="http://www.w3.org/2005/Atom" rel="self" type="application/rss+xml" href="http://feeds.feedburner.com/muleblog" /><feedburner:info uri="muleblog" /><atom10:link xmlns:atom10="http://www.w3.org/2005/Atom" rel="hub" href="http://pubsubhubbub.appspot.com/" /><feedburner:emailServiceId>muleblog</feedburner:emailServiceId><feedburner:feedburnerHostname>http://feedburner.google.com</feedburner:feedburnerHostname><feedburner:feedFlare href="http://add.my.yahoo.com/rss?url=http%3A%2F%2Ffeeds.feedburner.com%2Fmuleblog" src="http://us.i1.yimg.com/us.yimg.com/i/us/my/addtomyyahoo4.gif">Subscribe with My Yahoo!</feedburner:feedFlare><feedburner:feedFlare href="http://www.newsgator.com/ngs/subscriber/subext.aspx?url=http%3A%2F%2Ffeeds.feedburner.com%2Fmuleblog" src="http://www.newsgator.com/images/ngsub1.gif">Subscribe with NewsGator</feedburner:feedFlare><feedburner:feedFlare href="http://feeds.my.aol.com/add.jsp?url=http%3A%2F%2Ffeeds.feedburner.com%2Fmuleblog" src="http://o.aolcdn.com/favorites.my.aol.com/webmaster/ffclient/webroot/locale/en-US/images/myAOLButtonSmall.gif">Subscribe with My AOL</feedburner:feedFlare><feedburner:feedFlare href="http://www.bloglines.com/sub/http://feeds.feedburner.com/muleblog" src="http://www.bloglines.com/images/sub_modern11.gif">Subscribe with Bloglines</feedburner:feedFlare><feedburner:feedFlare href="http://www.netvibes.com/subscribe.php?url=http%3A%2F%2Ffeeds.feedburner.com%2Fmuleblog" src="http://www.netvibes.com/img/add2netvibes.gif">Subscribe with Netvibes</feedburner:feedFlare><feedburner:feedFlare href="http://fusion.google.com/add?feedurl=http%3A%2F%2Ffeeds.feedburner.com%2Fmuleblog" src="http://buttons.googlesyndication.com/fusion/add.gif">Subscribe with Google</feedburner:feedFlare><feedburner:feedFlare href="http://www.pageflakes.com/subscribe.aspx?url=http%3A%2F%2Ffeeds.feedburner.com%2Fmuleblog" src="http://www.pageflakes.com/ImageFile.ashx?instanceId=Static_4&amp;fileName=ATP_blu_91x17.gif">Subscribe with Pageflakes</feedburner:feedFlare><item>
+		<title>Killing bugs in the bugs</title>
+		<link>http://feedproxy.google.com/~r/muleblog/~3/nCxsyAFUd7U/</link>
+		<comments>http://blogs.mulesoft.org/killing-bugs-in-the-bugs/#comments</comments>
+		<pubDate>Fri, 12 Aug 2011 06:25:22 +0000</pubDate>
+		<dc:creator>pablo.kraan</dc:creator>
+				<category><![CDATA[Tech Ramblings]]></category>
+
+		<guid isPermaLink="false">http://blogs.mulesoft.org/?p=7175</guid>
+		<description>In over 10 years of developer experience, I worked for different companies, in different roles, but I always found the same problem over and over again: bug reporting sucks. I spent some time thinking about how to avoid some usual problems in this area and I realize that we could apply the same technique we [...]&lt;div class="feedflare"&gt;
+&lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=nCxsyAFUd7U:T7A8xbyV498:yIl2AUoC8zA"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=yIl2AUoC8zA" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=nCxsyAFUd7U:T7A8xbyV498:63t7Ie-LG7Y"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=63t7Ie-LG7Y" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=nCxsyAFUd7U:T7A8xbyV498:D7DqB2pKExk"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?i=nCxsyAFUd7U:T7A8xbyV498:D7DqB2pKExk" border="0"&gt;&lt;/img&gt;&lt;/a&gt;
+&lt;/div&gt;&lt;img src="http://feeds.feedburner.com/~r/muleblog/~4/nCxsyAFUd7U" height="1" width="1"/&gt;</description>
+		<wfw:commentRss>http://blogs.mulesoft.org/killing-bugs-in-the-bugs/feed/</wfw:commentRss>
+		<slash:comments>0</slash:comments>
+		<feedburner:origLink>http://blogs.mulesoft.org/killing-bugs-in-the-bugs/</feedburner:origLink></item>
+		<item>
+		<title>Real-time Web with the new Salesforce streaming API</title>
+		<link>http://feedproxy.google.com/~r/muleblog/~3/UfIDZvvghlY/</link>
+		<comments>http://blogs.mulesoft.org/real-time-web-with-the-salesforce-streaming-api/#comments</comments>
+		<pubDate>Wed, 10 Aug 2011 10:30:53 +0000</pubDate>
+		<dc:creator>Ross Mason</dc:creator>
+				<category><![CDATA[Mule iON]]></category>
+		<category><![CDATA[Tech Ramblings]]></category>
+		<category><![CDATA[APIs]]></category>
+		<category><![CDATA[ion]]></category>
+		<category><![CDATA[Mule ESB]]></category>
+		<category><![CDATA[salesforce]]></category>
+		<category><![CDATA[Salesforce Chatter]]></category>
+		<category><![CDATA[Streaming APIs]]></category>
+		<category><![CDATA[twilio]]></category>
+
+		<guid isPermaLink="false">http://blogs.mulesoft.org/?p=7393</guid>
+		<description>Its about time the Web became more event-driven.  We have had AJAX for many years enabling events between server and browser, but on the backend we are still polling data. With the explosion of public APIs from SaaS, Social Media and Infrastructure Apps, more and more applications are written by composing web APIs. Developers often need to [...]&lt;div class="feedflare"&gt;
+&lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=UfIDZvvghlY:cxWbWF2y1v8:yIl2AUoC8zA"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=yIl2AUoC8zA" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=UfIDZvvghlY:cxWbWF2y1v8:63t7Ie-LG7Y"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=63t7Ie-LG7Y" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=UfIDZvvghlY:cxWbWF2y1v8:D7DqB2pKExk"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?i=UfIDZvvghlY:cxWbWF2y1v8:D7DqB2pKExk" border="0"&gt;&lt;/img&gt;&lt;/a&gt;
+&lt;/div&gt;&lt;img src="http://feeds.feedburner.com/~r/muleblog/~4/UfIDZvvghlY" height="1" width="1"/&gt;</description>
+		<wfw:commentRss>http://blogs.mulesoft.org/real-time-web-with-the-salesforce-streaming-api/feed/</wfw:commentRss>
+		<slash:comments>0</slash:comments>
+		<feedburner:origLink>http://blogs.mulesoft.org/real-time-web-with-the-salesforce-streaming-api/</feedburner:origLink></item>
+		<item>
+		<title>Cloud Connector of the Week: MongoDB</title>
+		<link>http://feedproxy.google.com/~r/muleblog/~3/LjvS_xLNY3k/</link>
+		<comments>http://blogs.mulesoft.org/cloud-connector-of-the-week-mongodb/#comments</comments>
+		<pubDate>Tue, 09 Aug 2011 10:51:15 +0000</pubDate>
+		<dc:creator>Emiliano Lesende</dc:creator>
+				<category><![CDATA[Mule ESB]]></category>
+		<category><![CDATA[Mule iON]]></category>
+		<category><![CDATA[Cloud Connector]]></category>
+		<category><![CDATA[mongoDB]]></category>
+
+		<guid isPermaLink="false">http://blogs.mulesoft.org/?p=7355</guid>
+		<description>This section of our blog is about showcasing current and upcoming cloud connectors. Cloud Connectors are Mule modules that allow easy connectivity to cloud APIs such as Twiiter, Facebook, and the thousands of Software as a Service platform out there on the net. This week will talk about Mongo. Mongo is very popular database nowadays, [...]&lt;div class="feedflare"&gt;
+&lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=LjvS_xLNY3k:B3_smFGQ-Js:yIl2AUoC8zA"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=yIl2AUoC8zA" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=LjvS_xLNY3k:B3_smFGQ-Js:63t7Ie-LG7Y"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=63t7Ie-LG7Y" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=LjvS_xLNY3k:B3_smFGQ-Js:D7DqB2pKExk"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?i=LjvS_xLNY3k:B3_smFGQ-Js:D7DqB2pKExk" border="0"&gt;&lt;/img&gt;&lt;/a&gt;
+&lt;/div&gt;&lt;img src="http://feeds.feedburner.com/~r/muleblog/~4/LjvS_xLNY3k" height="1" width="1"/&gt;</description>
+		<wfw:commentRss>http://blogs.mulesoft.org/cloud-connector-of-the-week-mongodb/feed/</wfw:commentRss>
+		<slash:comments>1</slash:comments>
+		<feedburner:origLink>http://blogs.mulesoft.org/cloud-connector-of-the-week-mongodb/</feedburner:origLink></item>
+		<item>
+		<title>SaaS Identity Provisioning use case</title>
+		<link>http://feedproxy.google.com/~r/muleblog/~3/6aPOXifKcbw/</link>
+		<comments>http://blogs.mulesoft.org/identity-provisioning-use-case/#comments</comments>
+		<pubDate>Thu, 04 Aug 2011 10:00:04 +0000</pubDate>
+		<dc:creator>Community</dc:creator>
+				<category><![CDATA[Mule ESB]]></category>
+		<category><![CDATA[Tech Ramblings]]></category>
+		<category><![CDATA[ActiveMQ]]></category>
+		<category><![CDATA[Cloud Connector]]></category>
+		<category><![CDATA[greytower]]></category>
+		<category><![CDATA[netsuite]]></category>
+		<category><![CDATA[novell]]></category>
+		<category><![CDATA[Salesforce.com]]></category>
+
+		<guid isPermaLink="false">http://blogs.mulesoft.org/?p=7162</guid>
+		<description>On one of the previous blog posts by Ross, &amp;#8220;To ESB or Not to ESB&amp;#8220;, he did a great job in outlining the two basic integration architectures: &amp;#8220;Enterprise Service Bus&amp;#8221; and &amp;#8220;Hub and Spoke&amp;#8221;. Included in the Blog is a good overview of the benefits and considerations that are relevant for each architectural choice. A [...]&lt;div class="feedflare"&gt;
+&lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=6aPOXifKcbw:WjO0siAx-4o:yIl2AUoC8zA"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=yIl2AUoC8zA" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=6aPOXifKcbw:WjO0siAx-4o:63t7Ie-LG7Y"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=63t7Ie-LG7Y" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=6aPOXifKcbw:WjO0siAx-4o:D7DqB2pKExk"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?i=6aPOXifKcbw:WjO0siAx-4o:D7DqB2pKExk" border="0"&gt;&lt;/img&gt;&lt;/a&gt;
+&lt;/div&gt;&lt;img src="http://feeds.feedburner.com/~r/muleblog/~4/6aPOXifKcbw" height="1" width="1"/&gt;</description>
+		<wfw:commentRss>http://blogs.mulesoft.org/identity-provisioning-use-case/feed/</wfw:commentRss>
+		<slash:comments>0</slash:comments>
+		<feedburner:origLink>http://blogs.mulesoft.org/identity-provisioning-use-case/</feedburner:origLink></item>
+		<item>
+		<title>Error handling testing with Byteman</title>
+		<link>http://feedproxy.google.com/~r/muleblog/~3/i9d4gD711w8/</link>
+		<comments>http://blogs.mulesoft.org/error-handling-testing-with-byteman/#comments</comments>
+		<pubDate>Wed, 03 Aug 2011 14:47:04 +0000</pubDate>
+		<dc:creator>Santiago Vacas</dc:creator>
+				<category><![CDATA[Tech Ramblings]]></category>
+		<category><![CDATA[Byteman]]></category>
+		<category><![CDATA[Fault injection]]></category>
+		<category><![CDATA[Testing]]></category>
+
+		<guid isPermaLink="false">http://blogs.mulesoft.org/?p=7295</guid>
+		<description>Testing exception handling code is not always an easy task. You either need to setup the external conditions that cause the exception to be raised or generate mocks to get the same results. A third option is using a bytecode injection tool like Byteman. Using Byteman scripting language you can insert custom behavior into the [...]&lt;div class="feedflare"&gt;
+&lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=i9d4gD711w8:Xmczc99euhU:yIl2AUoC8zA"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=yIl2AUoC8zA" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=i9d4gD711w8:Xmczc99euhU:63t7Ie-LG7Y"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=63t7Ie-LG7Y" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=i9d4gD711w8:Xmczc99euhU:D7DqB2pKExk"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?i=i9d4gD711w8:Xmczc99euhU:D7DqB2pKExk" border="0"&gt;&lt;/img&gt;&lt;/a&gt;
+&lt;/div&gt;&lt;img src="http://feeds.feedburner.com/~r/muleblog/~4/i9d4gD711w8" height="1" width="1"/&gt;</description>
+		<wfw:commentRss>http://blogs.mulesoft.org/error-handling-testing-with-byteman/feed/</wfw:commentRss>
+		<slash:comments>0</slash:comments>
+		<feedburner:origLink>http://blogs.mulesoft.org/error-handling-testing-with-byteman/</feedburner:origLink></item>
+		<item>
+		<title>Choosing the right integration/ESB platform</title>
+		<link>http://feedproxy.google.com/~r/muleblog/~3/VZa_A0H1N8Y/</link>
+		<comments>http://blogs.mulesoft.org/choosing-the-right-esb-platform/#comments</comments>
+		<pubDate>Tue, 02 Aug 2011 10:22:02 +0000</pubDate>
+		<dc:creator>Ross Mason</dc:creator>
+				<category><![CDATA[Mule ESB]]></category>
+		<category><![CDATA[Mule iON]]></category>
+		<category><![CDATA[Tech Ramblings]]></category>
+		<category><![CDATA[API Layer]]></category>
+		<category><![CDATA[esb]]></category>
+		<category><![CDATA[hub and spoke]]></category>
+		<category><![CDATA[Mule Studio]]></category>
+		<category><![CDATA[Processing Grid]]></category>
+
+		<guid isPermaLink="false">http://blogs.mulesoft.org/?p=7319</guid>
+		<description>This is my final post in a series of ESB or not to ESB articles where I have attempted to shed some light on what an ESB really is and show some alternative architectures for performing integration.  I&amp;#8217;ve given an overview of four main architectures that I see most often and provided some context about [...]&lt;div class="feedflare"&gt;
+&lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=VZa_A0H1N8Y:dSxc854du30:yIl2AUoC8zA"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=yIl2AUoC8zA" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=VZa_A0H1N8Y:dSxc854du30:63t7Ie-LG7Y"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=63t7Ie-LG7Y" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=VZa_A0H1N8Y:dSxc854du30:D7DqB2pKExk"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?i=VZa_A0H1N8Y:dSxc854du30:D7DqB2pKExk" border="0"&gt;&lt;/img&gt;&lt;/a&gt;
+&lt;/div&gt;&lt;img src="http://feeds.feedburner.com/~r/muleblog/~4/VZa_A0H1N8Y" height="1" width="1"/&gt;</description>
+		<wfw:commentRss>http://blogs.mulesoft.org/choosing-the-right-esb-platform/feed/</wfw:commentRss>
+		<slash:comments>3</slash:comments>
+		<feedburner:origLink>http://blogs.mulesoft.org/choosing-the-right-esb-platform/</feedburner:origLink></item>
+		<item>
+		<title>ESB or not to ESB Revisited – Part 3, API Layer and Grid Processing Architecture</title>
+		<link>http://feedproxy.google.com/~r/muleblog/~3/vsfa2LSr-nY/</link>
+		<comments>http://blogs.mulesoft.org/esb-or-not-to-esb-revisited-part-3/#comments</comments>
+		<pubDate>Thu, 28 Jul 2011 10:36:06 +0000</pubDate>
+		<dc:creator>Ross Mason</dc:creator>
+				<category><![CDATA[Mule ESB]]></category>
+		<category><![CDATA[Tech Ramblings]]></category>
+		<category><![CDATA[API Layer]]></category>
+		<category><![CDATA[Grid Processing]]></category>
+
+		<guid isPermaLink="false">http://blogs.mulesoft.org/?p=7264</guid>
+		<description>In this penultimate part of my ESB or not to ESB series I&amp;#8217;m going to cover two more architectures; API Layer and Processing Grid providing the benefits and considerations for each. &amp;#160; Previous Posts: ESB or not to ESB &amp;#8211; original post ESB or not to ESB revisited &amp;#8211; Part 1. What is an ESB? ESB [...]&lt;div class="feedflare"&gt;
+&lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=vsfa2LSr-nY:OzOxZgHFKKw:yIl2AUoC8zA"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=yIl2AUoC8zA" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=vsfa2LSr-nY:OzOxZgHFKKw:63t7Ie-LG7Y"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=63t7Ie-LG7Y" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=vsfa2LSr-nY:OzOxZgHFKKw:D7DqB2pKExk"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?i=vsfa2LSr-nY:OzOxZgHFKKw:D7DqB2pKExk" border="0"&gt;&lt;/img&gt;&lt;/a&gt;
+&lt;/div&gt;&lt;img src="http://feeds.feedburner.com/~r/muleblog/~4/vsfa2LSr-nY" height="1" width="1"/&gt;</description>
+		<wfw:commentRss>http://blogs.mulesoft.org/esb-or-not-to-esb-revisited-part-3/feed/</wfw:commentRss>
+		<slash:comments>3</slash:comments>
+		<feedburner:origLink>http://blogs.mulesoft.org/esb-or-not-to-esb-revisited-part-3/</feedburner:origLink></item>
+		<item>
+		<title>Validating complex XML messages with Mule and AbsoluteRule</title>
+		<link>http://feedproxy.google.com/~r/muleblog/~3/ORY3Rf-YbFM/</link>
+		<comments>http://blogs.mulesoft.org/validating-complex-xml-messages-with-mule-and-absoluterule/#comments</comments>
+		<pubDate>Tue, 26 Jul 2011 10:35:52 +0000</pubDate>
+		<dc:creator>Esteban Robles Luna</dc:creator>
+				<category><![CDATA[Mule ESB]]></category>
+		<category><![CDATA[AbsoluteRule]]></category>
+		<category><![CDATA[NRL]]></category>
+		<category><![CDATA[validation]]></category>
+		<category><![CDATA[XML]]></category>
+
+		<guid isPermaLink="false">http://blogs.mulesoft.org/?p=7066</guid>
+		<description>It is pretty common that Mule messages contain XML as a payload and that those messages need to be validated/transformed. XML documents can be automatically validated using XSD, though those validations are structural and sometimes we need to manually code some validation in plain Java (especially in complex scenarios like validating references, existence conditions and [...]&lt;div class="feedflare"&gt;
+&lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=ORY3Rf-YbFM:q7dbb5nf2H4:yIl2AUoC8zA"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=yIl2AUoC8zA" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=ORY3Rf-YbFM:q7dbb5nf2H4:63t7Ie-LG7Y"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=63t7Ie-LG7Y" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=ORY3Rf-YbFM:q7dbb5nf2H4:D7DqB2pKExk"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?i=ORY3Rf-YbFM:q7dbb5nf2H4:D7DqB2pKExk" border="0"&gt;&lt;/img&gt;&lt;/a&gt;
+&lt;/div&gt;&lt;img src="http://feeds.feedburner.com/~r/muleblog/~4/ORY3Rf-YbFM" height="1" width="1"/&gt;</description>
+		<wfw:commentRss>http://blogs.mulesoft.org/validating-complex-xml-messages-with-mule-and-absoluterule/feed/</wfw:commentRss>
+		<slash:comments>0</slash:comments>
+		<feedburner:origLink>http://blogs.mulesoft.org/validating-complex-xml-messages-with-mule-and-absoluterule/</feedburner:origLink></item>
+		<item>
+		<title>Using Mule session properties</title>
+		<link>http://feedproxy.google.com/~r/muleblog/~3/-K9cRy6Fm_M/</link>
+		<comments>http://blogs.mulesoft.org/using-mule-session-properties/#comments</comments>
+		<pubDate>Fri, 22 Jul 2011 10:19:56 +0000</pubDate>
+		<dc:creator>Pablo La Greca</dc:creator>
+				<category><![CDATA[Mule ESB]]></category>
+		<category><![CDATA[Mule 3]]></category>
+		<category><![CDATA[performance]]></category>
+
+		<guid isPermaLink="false">http://blogs.mulesoft.org/?p=7081</guid>
+		<description>Do you want share properties between mule instances? or just between different flows within Mule?. Then mule session properties are what you are looking for. How to add session properties The easier way is through Mule MessagePropertyTransformer: You can also accede Mule session using MuleEventContext: Considerations using Mule session properties Mule session is transmitted with [...]&lt;div class="feedflare"&gt;
+&lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=-K9cRy6Fm_M:jDkY5xif-Fs:yIl2AUoC8zA"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=yIl2AUoC8zA" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=-K9cRy6Fm_M:jDkY5xif-Fs:63t7Ie-LG7Y"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=63t7Ie-LG7Y" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=-K9cRy6Fm_M:jDkY5xif-Fs:D7DqB2pKExk"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?i=-K9cRy6Fm_M:jDkY5xif-Fs:D7DqB2pKExk" border="0"&gt;&lt;/img&gt;&lt;/a&gt;
+&lt;/div&gt;&lt;img src="http://feeds.feedburner.com/~r/muleblog/~4/-K9cRy6Fm_M" height="1" width="1"/&gt;</description>
+		<wfw:commentRss>http://blogs.mulesoft.org/using-mule-session-properties/feed/</wfw:commentRss>
+		<slash:comments>0</slash:comments>
+		<feedburner:origLink>http://blogs.mulesoft.org/using-mule-session-properties/</feedburner:origLink></item>
+		<item>
+		<title>Introducing Mule Query Language</title>
+		<link>http://feedproxy.google.com/~r/muleblog/~3/e5LGAhe48fc/</link>
+		<comments>http://blogs.mulesoft.org/introducing-mule-query-language/#comments</comments>
+		<pubDate>Thu, 21 Jul 2011 17:10:28 +0000</pubDate>
+		<dc:creator>Dan Diephouse</dc:creator>
+				<category><![CDATA[Mule ESB]]></category>
+		<category><![CDATA[APIs]]></category>
+		<category><![CDATA[Cloud Connect]]></category>
+		<category><![CDATA[MQL]]></category>
+		<category><![CDATA[Mule]]></category>
+		<category><![CDATA[REST]]></category>
+		<category><![CDATA[services]]></category>
+		<category><![CDATA[transformers]]></category>
+
+		<guid isPermaLink="false">http://blogs.mulesoft.org/?p=7202</guid>
+		<description>Working with web APIs, local APIs and different data formats and structures is too damn hard. You have to write painful verbose code to: Query Web APIs and work with the data Enrich and join data from external services with local services Compose RESTful services from existing services Version services and data formats Merge data [...]&lt;div class="feedflare"&gt;
+&lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=e5LGAhe48fc:I2RCgSqn4wE:yIl2AUoC8zA"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=yIl2AUoC8zA" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=e5LGAhe48fc:I2RCgSqn4wE:63t7Ie-LG7Y"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?d=63t7Ie-LG7Y" border="0"&gt;&lt;/img&gt;&lt;/a&gt; &lt;a href="http://feeds.feedburner.com/~ff/muleblog?a=e5LGAhe48fc:I2RCgSqn4wE:D7DqB2pKExk"&gt;&lt;img src="http://feeds.feedburner.com/~ff/muleblog?i=e5LGAhe48fc:I2RCgSqn4wE:D7DqB2pKExk" border="0"&gt;&lt;/img&gt;&lt;/a&gt;
+&lt;/div&gt;&lt;img src="http://feeds.feedburner.com/~r/muleblog/~4/e5LGAhe48fc" height="1" width="1"/&gt;</description>
+		<wfw:commentRss>http://blogs.mulesoft.org/introducing-mule-query-language/feed/</wfw:commentRss>
+		<slash:comments>4</slash:comments>
+		<feedburner:origLink>http://blogs.mulesoft.org/introducing-mule-query-language/</feedburner:origLink></item>
+	</channel>
+</rss>

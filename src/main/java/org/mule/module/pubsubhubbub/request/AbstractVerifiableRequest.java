@@ -11,6 +11,7 @@
 package org.mule.module.pubsubhubbub.request;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,7 @@ public abstract class AbstractVerifiableRequest implements Serializable
     private final String verificationToken;
 
     public AbstractVerifiableRequest(final MultivaluedMap<String, String> formParams)
+
     {
         callbackUrl = HubResource.getMandatoryUrlParameter(Constants.HUB_CALLBACK_PARAM, formParams);
         topicUrls = HubResource.getMandatoryUrlParameters(Constants.HUB_TOPIC_PARAM, formParams);
@@ -60,13 +62,22 @@ public abstract class AbstractVerifiableRequest implements Serializable
             return null;
         }
 
-        final byte[] secretAsBytes = secretAsString.getBytes(Constants.UTF8_ENCODING);
-        if (secretAsBytes.length >= Constants.MAXIMUM_SECRET_SIZE)
+        try
         {
-            throw new IllegalArgumentException("Maximum secret size is " + Constants.MAXIMUM_SECRET_SIZE
-                                               + " bytes");
+            final byte[] secretAsBytes = secretAsString.getBytes(HubResource.getMandatoryStringParameter(
+                Constants.REQUEST_ENCODING_PARAM, formParams));
+
+            if (secretAsBytes.length >= Constants.MAXIMUM_SECRET_SIZE)
+            {
+                throw new IllegalArgumentException("Maximum secret size is " + Constants.MAXIMUM_SECRET_SIZE
+                                                   + " bytes");
+            }
+            return secretAsBytes;
         }
-        return secretAsBytes;
+        catch (final UnsupportedEncodingException uee)
+        {
+            throw new RuntimeException("Failed to get secret's bytes", uee);
+        }
     }
 
     public abstract String getMode();

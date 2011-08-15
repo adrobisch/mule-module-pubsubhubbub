@@ -14,9 +14,23 @@
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
     
-  <!-- Currently: use raw Spring Beans, Later on: specific PuSH XML elements will be created -->
   <spring:beans>
-    <spring:import resource="classpath:pubsubhubbub-config.xml" />   
+    <spring:import resource="classpath:org/mule/module/pubsubhubbub/core-config.xml" />
+    
+    <!-- TODO configure the following on the PuSH artifact  -->
+    <spring:bean id="pushObjectStore"
+                 class="org.mule.util.store.PartitionedInMemoryObjectStore" />
+                 
+    <spring:bean id="pushRetryPolicyTemplate"
+                 class="org.mule.retry.async.AsynchronousRetryTemplate">
+        <spring:constructor-arg>
+            <spring:bean class="org.mule.retry.policies.SimpleRetryPolicyTemplate">
+                <!-- retry 12 times every 5 minutes-->
+                <spring:constructor-arg index="0" value="300000" />
+                <spring:constructor-arg index="1" value="12" />
+            </spring:bean>
+        </spring:constructor-arg>
+    </spring:bean>   
   </spring:beans>
 
   <flow name="pushHub">
@@ -39,4 +53,12 @@
     <test:component />
   </flow>
     
+  <flow name="publisher">
+    <http:inbound-endpoint address="http://localhost:${port3}/feeds/rss" />
+    <component>
+      <singleton-object class="org.mule.component.simple.StaticComponent">
+        <property key="dataFile" value="mouth.rss"/>
+      </singleton-object>
+    </component>
+  </flow>
 </mule>

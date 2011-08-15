@@ -15,30 +15,21 @@
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
        
-  <!-- Currently: use raw Spring Beans, Later on: specific PuSH XML elements will be created -->
+  <!-- TODO combine these loose Spring Beans in a single PuSH configuration artifact -->
   <spring:beans>
-    <spring:bean id="partitionedObjectStore"
-                 class="org.mule.util.store.PartitionedInMemoryObjectStore" />
-                 
     <spring:bean id="dataStore"
                  class="org.mule.module.pubsubhubbub.data.DataStore"
-                 p:objectStore-ref="partitionedObjectStore" />
+                 p:objectStore-ref="pushObjectStore" />
                  
-    <spring:bean id="retryPolicyTemplate"
-                 class="org.mule.retry.async.AsynchronousRetryTemplate">
-        <spring:constructor-arg>
-            <spring:bean class="org.mule.retry.policies.SimpleRetryPolicyTemplate">
-                <!-- retry 12 times every 5 minutes-->
-                <spring:constructor-arg index="0" value="300000" />
-                <spring:constructor-arg index="1" value="12" />
-            </spring:bean>
-        </spring:constructor-arg>
-    </spring:bean>
+    <spring:bean id="feedFetcher"
+                 class="com.sun.syndication.fetcher.impl.HttpClientFeedFetcher"
+                 p:preserveWireFeed="true"
+                 p:feedInfoCache-ref="dataStore" />
                  
     <spring:bean id="hubActionHandler"
                  abstract="true"
                  p:dataStore-ref="dataStore"
-                 p:retryPolicyTemplate-ref="retryPolicyTemplate" />
+                 p:retryPolicyTemplate-ref="pushRetryPolicyTemplate" />
                  
     <spring:bean id="subscriptionHandler"
                  parent="hubActionHandler"
@@ -50,7 +41,8 @@
                  
     <spring:bean id="publisherHandler"
                  parent="hubActionHandler"
-                 class="org.mule.module.pubsubhubbub.handler.PublisherHandler" />
+                 class="org.mule.module.pubsubhubbub.handler.PublisherHandler"
+                 p:feedFetcher-ref="feedFetcher" />
                  
     <util:map id="handlers">
         <spring:entry key="#{T(org.mule.module.pubsubhubbub.HubMode).SUBSCRIBE}"

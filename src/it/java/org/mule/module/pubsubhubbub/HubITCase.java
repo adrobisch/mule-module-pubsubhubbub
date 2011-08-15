@@ -96,7 +96,7 @@ public class HubITCase extends DynamicPortTestCase
     @Override
     protected int getNumPortsToFind()
     {
-        return 2;
+        return 3;
     }
 
     @Override

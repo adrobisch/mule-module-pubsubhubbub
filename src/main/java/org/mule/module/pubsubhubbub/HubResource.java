@@ -21,6 +21,8 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -39,8 +41,11 @@ public class HubResource
     private Map<HubMode, AbstractHubActionHandler> handlers;
 
     @POST
-    public Response handleRequest(final MultivaluedMap<String, String> formParams)
+    public Response handleRequest(final MultivaluedMap<String, String> formParams,
+                                  @Context final HttpHeaders httpHeaders)
     {
+        formParams.putSingle(Constants.REQUEST_ENCODING_PARAM, getRequestCharset(httpHeaders));
+
         for (final Entry<String, List<String>> param : formParams.entrySet())
         {
             if ((param.getValue().size() > 1)
@@ -63,6 +68,25 @@ public class HubResource
         }
 
         return handler.handle(formParams);
+    }
+
+    private String getRequestCharset(final HttpHeaders httpHeaders)
+    {
+        final MediaType mediaType = httpHeaders.getMediaType();
+        if (mediaType == null)
+        {
+            return Constants.DEFAULT_CHARSET;
+        }
+
+        final Map<String, String> mediaTypeParameters = mediaType.getParameters();
+        if (mediaTypeParameters == null)
+        {
+            return Constants.DEFAULT_CHARSET;
+        }
+
+        final String mediaTypeCharsetParameter = mediaTypeParameters.get(Constants.CHARSET_MEDIA_TYPE_PARAM);
+
+        return mediaTypeCharsetParameter != null ? mediaTypeCharsetParameter : Constants.DEFAULT_CHARSET;
     }
 
     public void setHandlers(final Map<HubMode, AbstractHubActionHandler> handlers)

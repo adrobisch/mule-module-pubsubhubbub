@@ -18,8 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Constants
 {
-    // TODO encoding should come from the request and not assume utf-8
-    public static final Charset UTF8_ENCODING = Charset.forName("UTF-8");
+    public static String USER_AGENT_BASE = "Mule PubSubHubbub Hub";
 
     // TODO make this configurable on the hub
     public static final long DEFAULT_LEASE_SECONDS = TimeUnit.DAYS.toSeconds(7);
@@ -27,7 +26,11 @@ public class Constants
 
     public static final int MAXIMUM_SECRET_SIZE = 200;
 
+    public static final String CHARSET_MEDIA_TYPE_PARAM = "charset";
+    public static final String DEFAULT_CHARSET = Charset.defaultCharset().toString();
+
     // Common Parameters
+    public static final String REQUEST_ENCODING_PARAM = "request.encoding";
     // Mandatory
     public static final String HUB_MODE_PARAM = "hub.mode";
 
