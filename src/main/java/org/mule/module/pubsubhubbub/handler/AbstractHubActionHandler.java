@@ -27,6 +27,7 @@ public abstract class AbstractHubActionHandler implements MuleContextAware
 
     private DataStore dataStore;
 
+    // TODO support different retry policies for subsciption and publication workflows
     private RetryPolicyTemplate retryPolicyTemplate;
 
     public void setMuleContext(final MuleContext muleContext)

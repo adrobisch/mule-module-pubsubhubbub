@@ -12,17 +12,23 @@ package org.mule.module.pubsubhubbub.data;
 
 import java.io.Serializable;
 import java.net.URI;
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.mule.api.store.ObjectDoesNotExistException;
 import org.mule.api.store.ObjectStoreException;
 import org.mule.api.store.PartitionableObjectStore;
 
-public class DataStore
+import com.sun.syndication.fetcher.impl.FeedFetcherCache;
+import com.sun.syndication.fetcher.impl.SyndFeedInfo;
+
+public class DataStore implements FeedFetcherCache
 {
     private static final String TOPIC_SUBSCRIPTION_CALLBACKS_PARTITION = "TopicSubscriptionCallbacks";
+    private static final String FEED_FETCHER_CACHE = "FeedFetcherCache";
 
     private PartitionableObjectStore<Serializable> objectStore;
 
@@ -62,6 +68,27 @@ public class DataStore
         return result;
     }
 
+    // Support for Rome feed fetcher
+    public SyndFeedInfo getFeedInfo(final URL feedUrl)
+    {
+        return (SyndFeedInfo) retrieve(feedUrl, FEED_FETCHER_CACHE, null);
+    }
+
+    public void setFeedInfo(final URL feedUrl, final SyndFeedInfo syndFeedInfo)
+    {
+        store(feedUrl, syndFeedInfo, FEED_FETCHER_CACHE);
+    }
+
+    public void clear()
+    {
+        flush(FEED_FETCHER_CACHE);
+    }
+
+    public SyndFeedInfo remove(final URL feedUrl)
+    {
+        return (SyndFeedInfo) remove(feedUrl, FEED_FETCHER_CACHE);
+    }
+
     private void store(final Serializable key, final Serializable value, final String domain)
     {
         try
@@ -77,6 +104,39 @@ public class DataStore
         catch (final ObjectStoreException ose)
         {
             throw new RuntimeException("Failed to store: " + value, ose);
+        }
+    }
+
+    private Serializable remove(final Serializable key, final String domain)
+    {
+        try
+        {
+            return objectStore.remove(key, domain);
+        }
+        catch (final ObjectDoesNotExistException odnee)
+        {
+            return null;
+        }
+        catch (final ObjectStoreException ose)
+        {
+            throw new RuntimeException("Failed to remove: " + key, ose);
+        }
+    }
+
+    private void flush(final String domain)
+    {
+        try
+        {
+            // not atomic :(
+            final List<Serializable> keys = objectStore.allKeys(domain);
+            for (final Serializable key : keys)
+            {
+                remove(key, domain);
+            }
+        }
+        catch (final ObjectStoreException ose)
+        {
+            throw new RuntimeException("Failed to flush: " + domain, ose);
         }
     }
 
@@ -128,4 +188,5 @@ public class DataStore
             throw new RuntimeException("Failed to retrieve: " + key + " at " + domain, ose);
         }
     }
+
 }

@@ -53,14 +53,11 @@ public enum VerificationType
         {
             final RetryCallback callback = new RetryCallback()
             {
-
-                @Override
                 public String getWorkDescription()
                 {
                     return "Attempting verification of: " + request;
                 }
 
-                @Override
                 public void doWork(final RetryContext context) throws Exception
                 {
                     attemptVerification(request, hubActionHandler.getMuleContext());

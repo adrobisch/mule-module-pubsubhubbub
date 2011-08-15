@@ -11,6 +11,9 @@
 package org.mule.module.pubsubhubbub;
 
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class Constants
@@ -38,4 +41,12 @@ public class Constants
     public static final String HUB_LEASE_SECONDS_PARAM = "hub.lease_seconds";
     public static final String HUB_SECRET_PARAM = "hub.secret";
     public static final String HUB_VERIFY_TOKEN_PARAM = "hub.verify_token";
+
+    // Publisher Parameters
+    // Mandatory
+    public static final String HUB_URL_PARAM = "hub.url";
+
+    public static final Set<String> SUPPORTED_MULTIVALUED_PARAMS = new HashSet<String>(
+        Arrays.asList(new String[]{Constants.HUB_VERIFY_PARAM, Constants.HUB_TOPIC_PARAM,
+            Constants.HUB_URL_PARAM}));
 }

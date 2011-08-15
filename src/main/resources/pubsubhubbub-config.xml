@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:jersey="http://www.mulesoft.org/schema/mule/jersey"
+  xmlns:http="http://www.mulesoft.org/schema/mule/http"
+  xmlns:test="http://www.mulesoft.org/schema/mule/test"
+  xmlns:spring="http://www.springframework.org/schema/beans"
+  xmlns:util="http://www.springframework.org/schema/util"
+  xmlns:p="http://www.springframework.org/schema/p"
+  xsi:schemaLocation="
+       http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/3.2/mule.xsd
+       http://www.mulesoft.org/schema/mule/jersey http://www.mulesoft.org/schema/mule/jersey/3.2/mule-jersey.xsd
+       http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/3.2/mule-http.xsd
+       http://www.mulesoft.org/schema/mule/test http://www.mulesoft.org/schema/mule/test/3.2/mule-test.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+       
+  <!-- Currently: use raw Spring Beans, Later on: specific PuSH XML elements will be created -->
+  <spring:beans>
+    <spring:bean id="partitionedObjectStore"
+                 class="org.mule.util.store.PartitionedInMemoryObjectStore" />
+                 
+    <spring:bean id="dataStore"
+                 class="org.mule.module.pubsubhubbub.data.DataStore"
+                 p:objectStore-ref="partitionedObjectStore" />
+                 
+    <spring:bean id="retryPolicyTemplate"
+                 class="org.mule.retry.async.AsynchronousRetryTemplate">
+        <spring:constructor-arg>
+            <spring:bean class="org.mule.retry.policies.SimpleRetryPolicyTemplate">
+                <!-- retry 12 times every 5 minutes-->
+                <spring:constructor-arg index="0" value="300000" />
+                <spring:constructor-arg index="1" value="12" />
+            </spring:bean>
+        </spring:constructor-arg>
+    </spring:bean>
+                 
+    <spring:bean id="hubActionHandler"
+                 abstract="true"
+                 p:dataStore-ref="dataStore"
+                 p:retryPolicyTemplate-ref="retryPolicyTemplate" />
+                 
+    <spring:bean id="subscriptionHandler"
+                 parent="hubActionHandler"
+                 class="org.mule.module.pubsubhubbub.handler.SubscriptionHandler" />
+                 
+    <spring:bean id="unsubscriptionHandler"
+                 parent="hubActionHandler"
+                 class="org.mule.module.pubsubhubbub.handler.UnsubscriptionHandler" />
+                 
+    <spring:bean id="publisherHandler"
+                 parent="hubActionHandler"
+                 class="org.mule.module.pubsubhubbub.handler.PublisherHandler" />
+                 
+    <util:map id="handlers">
+        <spring:entry key="#{T(org.mule.module.pubsubhubbub.HubMode).SUBSCRIBE}"
+                      value-ref="subscriptionHandler" />
+        <spring:entry key="#{T(org.mule.module.pubsubhubbub.HubMode).UNSUBSCRIBE}"
+                      value-ref="unsubscriptionHandler" />
+        <spring:entry key="#{T(org.mule.module.pubsubhubbub.HubMode).PUBLISH}"
+                      value-ref="publisherHandler" />
+    </util:map>
+  
+    <spring:bean id="hubResource"
+                 class="org.mule.module.pubsubhubbub.HubResource"
+                 p:handlers-ref="handlers" />
+  </spring:beans>
+  
+  <flow name="pushHubResources">
+    <jersey:resources>
+      <component>
+        <spring-object bean="hubResource" />
+      </component>
+      <jersey:exception-mapper class="org.mule.module.pubsubhubbub.HubExceptionMapper" />
+    </jersey:resources>
+  </flow>
+</mule>

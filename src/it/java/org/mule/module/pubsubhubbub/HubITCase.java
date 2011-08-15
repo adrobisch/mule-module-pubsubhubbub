@@ -122,8 +122,8 @@ public class HubITCase extends DynamicPortTestCase
 
         final MuleMessage response = sendRequestToHub(subscriptionRequest);
         assertEquals("400", response.getInboundProperty("http.status"));
-        assertEquals("Multivalued parameters are only supported for: hub.verify,hub.topic",
-            response.getPayloadAsString());
+        assertTrue(StringUtils.startsWith(response.getPayloadAsString(),
+            "Multivalued parameters are only supported for:"));
     }
 
     public void testBadSubscriptionRequest() throws Exception

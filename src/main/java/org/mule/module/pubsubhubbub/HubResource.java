@@ -43,13 +43,12 @@ public class HubResource
     {
         for (final Entry<String, List<String>> param : formParams.entrySet())
         {
-            if ((param.getValue().size() > 1) && (!param.getKey().equals(Constants.HUB_VERIFY_PARAM))
-                && (!param.getKey().equals(Constants.HUB_TOPIC_PARAM)))
+            if ((param.getValue().size() > 1)
+                && (!Constants.SUPPORTED_MULTIVALUED_PARAMS.contains(param.getKey())))
             {
                 throw new IllegalArgumentException("Multivalued parameters are only supported for: "
-                                                   + StringUtils.join(
-                                                       new String[]{Constants.HUB_VERIFY_PARAM,
-                                                           Constants.HUB_TOPIC_PARAM}, ','));
+                                                   + StringUtils.join(Constants.SUPPORTED_MULTIVALUED_PARAMS,
+                                                       ','));
             }
         }
 
