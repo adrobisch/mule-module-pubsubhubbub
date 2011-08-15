@@ -49,7 +49,6 @@ public class Constants
     // Mandatory
     public static final String HUB_URL_PARAM = "hub.url";
 
-    public static final Set<String> SUPPORTED_MULTIVALUED_PARAMS = new HashSet<String>(
-        Arrays.asList(new String[]{Constants.HUB_VERIFY_PARAM, Constants.HUB_TOPIC_PARAM,
-            Constants.HUB_URL_PARAM}));
+    public static final Set<String> SUPPORTED_MULTIVALUED_PARAMS = new HashSet<String>(Arrays.asList(
+        Constants.HUB_VERIFY_PARAM, Constants.HUB_TOPIC_PARAM, Constants.HUB_URL_PARAM));
 }

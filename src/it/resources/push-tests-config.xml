@@ -54,11 +54,17 @@
   </flow>
     
   <flow name="publisher">
-    <http:inbound-endpoint address="http://localhost:${port3}/feeds/rss" />
-    <component>
-      <singleton-object class="org.mule.component.simple.StaticComponent">
-        <property key="dataFile" value="mouth.rss"/>
-      </singleton-object>
-    </component>
+    <composite-source>
+      <http:inbound-endpoint address="http://localhost:${port3}/feeds/rss/1" />
+      <http:inbound-endpoint address="http://localhost:${port3}/feeds/rss/2" />
+    </composite-source>
+      <response>
+        <component>
+          <singleton-object class="org.mule.component.simple.StaticComponent">
+            <property key="dataFile" value="mouth.rss"/>
+          </singleton-object>
+        </component>
+      </response>
+    <test:component />
   </flow>
 </mule>

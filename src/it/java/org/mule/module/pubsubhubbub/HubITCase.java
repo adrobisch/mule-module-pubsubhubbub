@@ -14,6 +14,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -73,9 +74,13 @@ public class HubITCase extends DynamicPortTestCase
     private static final Map<String, List<String>> DEFAULT_SUBSCRIPTION_PARAMS = Collections.emptyMap();
 
     private MuleClient muleClient;
+    private DataStore dataStore;
+
     private FunctionalTestComponent successfullSubscriberFTC;
     private CountdownCallback successfullSubscriberCC;
-    private DataStore dataStore;
+
+    private FunctionalTestComponent publisherFTC;
+    private CountdownCallback publisherCC;
 
     @Override
     protected void doSetUp() throws Exception
@@ -84,6 +89,7 @@ public class HubITCase extends DynamicPortTestCase
         dataStore = muleContext.getRegistry().lookupObject(DataStore.class);
         muleClient = new MuleClient(muleContext);
         setupSuccessfullSubscriberFTC(1);
+        setupPublisherFTC(1);
     }
 
     private void setupSuccessfullSubscriberFTC(final int messagesExpected) throws Exception
@@ -91,6 +97,13 @@ public class HubITCase extends DynamicPortTestCase
         successfullSubscriberFTC = getFunctionalTestComponent("successfullSubscriberCallback");
         successfullSubscriberCC = new CountdownCallback(messagesExpected);
         successfullSubscriberFTC.setEventCallback(successfullSubscriberCC);
+    }
+
+    private void setupPublisherFTC(final int messagesExpected) throws Exception
+    {
+        publisherFTC = getFunctionalTestComponent("publisher");
+        publisherCC = new CountdownCallback(messagesExpected);
+        publisherFTC.setEventCallback(publisherCC);
     }
 
     @Override
@@ -214,6 +227,45 @@ public class HubITCase extends DynamicPortTestCase
     {
         doTestSuccessfullVerifiableAction(Action.SUBSCRIBE, Verification.ASYNC, DEFAULT_SUBSCRIPTION_PARAMS,
             DEFAULT_CALLBACK_QUERY);
+    }
+
+    public void testSuccessfullNewContentNotificationAndContentFetch() throws Exception
+    {
+        final Map<String, String> subscriptionRequest = new HashMap<String, String>();
+        subscriptionRequest.put("hub.mode", "publish");
+        subscriptionRequest.put("hub.url", "http://localhost:" + getPublisherPort() + "/feeds/rss/1");
+
+        final MuleMessage response = wrapAndSendRequestToHub(subscriptionRequest);
+        assertEquals("204", response.getInboundProperty("http.status"));
+
+        publisherCC.await(TimeUnit.SECONDS.toMillis(getTestTimeoutSecs()));
+        assertEquals("/feeds/rss/1", publisherFTC.getLastReceivedMessage());
+    }
+
+    public void testSuccessfullNewMultiContentNotificationAndContentFetch() throws Exception
+    {
+        setupPublisherFTC(2);
+
+        final Map<String, List<String>> subscriptionRequest = new HashMap<String, List<String>>();
+        subscriptionRequest.put("hub.mode", Arrays.asList("publish"));
+        subscriptionRequest.put(
+            "hub.url",
+            Arrays.asList("http://localhost:" + getPublisherPort() + "/feeds/rss/1", "http://localhost:"
+                                                                                     + getPublisherPort()
+                                                                                     + "/feeds/rss/2"));
+
+        final MuleMessage response = sendRequestToHub(subscriptionRequest);
+        assertEquals("204", response.getInboundProperty("http.status"));
+
+        publisherCC.await(TimeUnit.SECONDS.toMillis(getTestTimeoutSecs()));
+        final int receivedMessagesCount = publisherFTC.getReceivedMessagesCount();
+        assertEquals(2, receivedMessagesCount);
+        final Set<String> expectedMessages = new HashSet<String>(
+            Arrays.asList("/feeds/rss/1", "/feeds/rss/2"));
+        for (int i = 1; i <= receivedMessagesCount; i++)
+        {
+            assertTrue(expectedMessages.contains(publisherFTC.getReceivedMessage(i)));
+        }
     }
 
     //
@@ -416,5 +468,10 @@ public class HubITCase extends DynamicPortTestCase
     private Integer getSubscriberCallbacksPort()
     {
         return getPorts().get(1);
+    }
+
+    private Integer getPublisherPort()
+    {
+        return getPorts().get(2);
     }
 }

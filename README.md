@@ -28,11 +28,11 @@ Done:
 
 - Subscription with Synchronous and Asynchronous Verification
 - Unsubscription with Synchronous and Asynchronous Verification
+- Publisher New Content Notification
+- Content Fetch
 
 Pending:
 
-- New Content Notification
-- Content Fetch
 - Content Distribution
 - Authenticated Content Distribution
 - Number of subscribers in user agent (including support of X-Hub-On-Behalf-Of)
