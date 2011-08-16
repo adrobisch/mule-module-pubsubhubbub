@@ -28,7 +28,8 @@ import com.sun.syndication.fetcher.impl.SyndFeedInfo;
 public class DataStore implements FeedFetcherCache
 {
     private static final String TOPIC_SUBSCRIPTION_CALLBACKS_PARTITION = "TopicSubscriptionCallbacks";
-    private static final String FEED_FETCHER_CACHE = "FeedFetcherCache";
+    private static final String TOPIC_FEED_IDS_PARTITION = "TopicFeedEntryIds";
+    private static final String FEED_FETCHER_CACHE_PARTITION = "FeedFetcherCache";
 
     private PartitionableObjectStore<Serializable> objectStore;
 
@@ -68,25 +69,37 @@ public class DataStore implements FeedFetcherCache
         return result;
     }
 
+    public void storeTopicFeedId(final URI topicUrl, final String feedId)
+    {
+        storeInSet(topicUrl, feedId, TOPIC_FEED_IDS_PARTITION);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Set<String> getTopicFeedIds(final URI topicUrl)
+    {
+        return (Set<String>) retrieve(topicUrl, TOPIC_FEED_IDS_PARTITION,
+            (Serializable) Collections.EMPTY_SET);
+    }
+
     // Support for Rome feed fetcher
     public SyndFeedInfo getFeedInfo(final URL feedUrl)
     {
-        return (SyndFeedInfo) retrieve(feedUrl, FEED_FETCHER_CACHE, null);
+        return (SyndFeedInfo) retrieve(feedUrl, FEED_FETCHER_CACHE_PARTITION, null);
     }
 
     public void setFeedInfo(final URL feedUrl, final SyndFeedInfo syndFeedInfo)
     {
-        store(feedUrl, syndFeedInfo, FEED_FETCHER_CACHE);
+        store(feedUrl, syndFeedInfo, FEED_FETCHER_CACHE_PARTITION);
     }
 
     public void clear()
     {
-        flush(FEED_FETCHER_CACHE);
+        flush(FEED_FETCHER_CACHE_PARTITION);
     }
 
     public SyndFeedInfo remove(final URL feedUrl)
     {
-        return (SyndFeedInfo) remove(feedUrl, FEED_FETCHER_CACHE);
+        return (SyndFeedInfo) remove(feedUrl, FEED_FETCHER_CACHE_PARTITION);
     }
 
     private void store(final Serializable key, final Serializable value, final String domain)

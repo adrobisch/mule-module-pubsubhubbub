@@ -20,9 +20,14 @@ public class Constants
 {
     public static String USER_AGENT_BASE = "Mule PubSubHubbub Hub";
 
+    public static String HUB_SIGNATURE_HEADER = "X-Hub-Signature";
+
+    public static String RSS_CONTENT_TYPE = "application/rss+xml";
+    public static String ATOM_CONTENT_TYPE = "application/atom+xml";
+
     // TODO make this configurable on the hub
     public static final long DEFAULT_LEASE_SECONDS = TimeUnit.DAYS.toSeconds(7);
-    public static final long VERIFICATION_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(15L);
+    public static final long SUBSCRIBER_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(15L);
 
     public static final int MAXIMUM_SECRET_SIZE = 200;
 

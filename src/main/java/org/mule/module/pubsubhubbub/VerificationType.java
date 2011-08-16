@@ -109,7 +109,7 @@ public enum VerificationType
             final URI verificationUrl = buildVerificationUrl(request, verificationChallenge);
 
             final MuleMessage response = new MuleClient(muleContext).request(verificationUrl.toString(),
-                Constants.VERIFICATION_TIMEOUT_MILLIS);
+                Constants.SUBSCRIBER_TIMEOUT_MILLIS);
 
             validateResponse(response, request, verificationChallenge);
         }
