@@ -15,10 +15,6 @@ Build Commands
 To compile and install in the local Maven repository:
 
     mvn clean install  
-
-To run the test suite:
-
-    mvn -Pit verify
     
     
 Implementation Status
