@@ -10,6 +10,7 @@
 
 package org.mule.module.pubsubhubbub;
 
+import java.io.StringReader;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,6 +35,9 @@ import org.mule.tck.DynamicPortTestCase;
 import org.mule.tck.functional.CountdownCallback;
 import org.mule.tck.functional.FunctionalTestComponent;
 import org.mule.transport.http.HttpConstants;
+
+import com.sun.syndication.feed.synd.SyndFeed;
+import com.sun.syndication.io.SyndFeedInput;
 
 public class HubITCase extends DynamicPortTestCase
 {
@@ -231,15 +235,8 @@ public class HubITCase extends DynamicPortTestCase
 
     public void testSuccessfullNewContentNotificationAndContentFetch() throws Exception
     {
-        final Map<String, String> subscriptionRequest = new HashMap<String, String>();
-        subscriptionRequest.put("hub.mode", "publish");
-        subscriptionRequest.put("hub.url", "http://localhost:" + getPublisherPort() + "/feeds/rss/1");
-
-        final MuleMessage response = wrapAndSendRequestToHub(subscriptionRequest);
-        assertEquals("204", response.getInboundProperty("http.status"));
-
-        publisherCC.await(TimeUnit.SECONDS.toMillis(getTestTimeoutSecs()));
-        assertEquals("/feeds/rss/1", publisherFTC.getLastReceivedMessage());
+        final String topicUrl = "http://localhost:" + getPublisherPort() + "/feeds/mouth/rss";
+        doTestSuccessfullNewContentNotificationAndContentFetch(topicUrl);
     }
 
     public void testSuccessfullNewMultiContentNotificationAndContentFetch() throws Exception
@@ -250,9 +247,9 @@ public class HubITCase extends DynamicPortTestCase
         subscriptionRequest.put("hub.mode", Arrays.asList("publish"));
         subscriptionRequest.put(
             "hub.url",
-            Arrays.asList("http://localhost:" + getPublisherPort() + "/feeds/rss/1", "http://localhost:"
-                                                                                     + getPublisherPort()
-                                                                                     + "/feeds/rss/2"));
+            Arrays.asList("http://localhost:" + getPublisherPort() + "/feeds/mouth/rss", "http://localhost:"
+                                                                                         + getPublisherPort()
+                                                                                         + "/feeds/mouth/rss"));
 
         final MuleMessage response = sendRequestToHub(subscriptionRequest);
         assertEquals("204", response.getInboundProperty("http.status"));
@@ -260,16 +257,35 @@ public class HubITCase extends DynamicPortTestCase
         publisherCC.await(TimeUnit.SECONDS.toMillis(getTestTimeoutSecs()));
         final int receivedMessagesCount = publisherFTC.getReceivedMessagesCount();
         assertEquals(2, receivedMessagesCount);
-        final Set<String> expectedMessages = new HashSet<String>(
-            Arrays.asList("/feeds/rss/1", "/feeds/rss/2"));
+        final Set<String> expectedMessages = new HashSet<String>(Arrays.asList("/feeds/mouth/rss",
+            "/feeds/mouth/rss"));
         for (int i = 1; i <= receivedMessagesCount; i++)
         {
             assertTrue(expectedMessages.contains(publisherFTC.getReceivedMessage(i)));
         }
     }
 
+    public void testSuccessfullContentDistribution() throws Exception
+    {
+        final String topicUrl = "http://localhost:" + getPublisherPort() + "/feeds/mouth/rss";
+        final Map<String, List<String>> extraSubscriptionParam = Collections.singletonMap("hub.topic",
+            Collections.singletonList(topicUrl));
+        doTestSuccessfullSynchronousVerifiableAction(Action.SUBSCRIBE, extraSubscriptionParam);
+
+        // reset the callback FTC latch
+        setupSuccessfullSubscriberFTC(1);
+
+        doTestSuccessfullNewContentNotificationAndContentFetch(topicUrl);
+
+        // check RSS content has been pushed to callback FTC
+        successfullSubscriberCC.await(TimeUnit.SECONDS.toMillis(getTestTimeoutSecs()));
+        final SyndFeed syndFeed = new SyndFeedInput(true).build(new StringReader(
+            (String) successfullSubscriberFTC.getLastReceivedMessage()));
+        assertEquals("rss_2.0", syndFeed.getFeedType());
+    }
+
     //
-    // Support methods
+    // Supporting methods
     //
     private void doTestSuccessfullSynchronousVerifiableAction(final Action action) throws Exception
     {
@@ -429,6 +445,20 @@ public class HubITCase extends DynamicPortTestCase
             Thread.sleep(100L);
         }
         return Collections.emptySet();
+    }
+
+    private void doTestSuccessfullNewContentNotificationAndContentFetch(final String topicUrl)
+        throws MuleException, InterruptedException
+    {
+        final Map<String, String> subscriptionRequest = new HashMap<String, String>();
+        subscriptionRequest.put("hub.mode", "publish");
+        subscriptionRequest.put("hub.url", topicUrl);
+
+        final MuleMessage response = wrapAndSendRequestToHub(subscriptionRequest);
+        assertEquals("204", response.getInboundProperty("http.status"));
+
+        publisherCC.await(TimeUnit.SECONDS.toMillis(getTestTimeoutSecs()));
+        assertEquals("/feeds/mouth/rss", publisherFTC.getLastReceivedMessage());
     }
 
     private MuleMessage wrapAndSendRequestToHub(final Map<String, String> subscriptionRequest)

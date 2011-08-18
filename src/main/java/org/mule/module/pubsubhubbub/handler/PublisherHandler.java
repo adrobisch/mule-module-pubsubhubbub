@@ -51,7 +51,6 @@ import com.sun.syndication.fetcher.FetcherListener;
 import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.WireFeedOutput;
 
-// TODO integration test content distribution
 public class PublisherHandler extends AbstractHubActionHandler implements FetcherListener
 {
     private FeedFetcher feedFetcher;
