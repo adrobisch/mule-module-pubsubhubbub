@@ -50,6 +50,7 @@
         <response>
             <script:transformer>
                 <script:script engine="groovy">
+                <![CDATA[
                     if (message.getInboundProperty('http.method') == 'GET') {
                       // (un)subscription confirmation
                       return org.mule.module.pubsubhubbub.TestUtils.getUrlParameters(payload).get('hub.challenge').get(0)
@@ -59,6 +60,7 @@
                       message.setOutboundProperty('X-Hub-On-Behalf-Of', 123)
                       return ''
                     }
+                ]]>
                 </script:script>
             </script:transformer>
         </response>
@@ -80,6 +82,15 @@
                 <add-message-property key="Content-Type" value="application/rss+xml" />
             </message-properties-transformer>
         </response>
+        <script:transformer>
+            <script:script engine="groovy">
+            <![CDATA[
+                userAgent = message.getInboundProperty('User-Agent')
+                if (!(userAgent==~ /Mule PubSubHubbub Hub \(.+; \d+ subscribers\)/)) throw new IllegalArgumentException("Wrong user agent: ${userAgent}")
+                return message
+            ]]>
+            </script:script>
+        </script:transformer>
         <test:component />
     </flow>
 </mule>

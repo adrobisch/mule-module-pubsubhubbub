@@ -41,6 +41,7 @@ import org.mule.module.client.MuleClient;
 import org.mule.module.pubsubhubbub.Constants;
 import org.mule.module.pubsubhubbub.HubResource;
 import org.mule.module.pubsubhubbub.data.TopicSubscription;
+import org.mule.module.pubsubhubbub.rome.PerRequestUserAgentHttpClientFeedFetcher;
 import org.mule.transport.http.HttpConnector;
 
 import com.sun.syndication.feed.synd.SyndEntry;
@@ -76,11 +77,17 @@ public class PublisherHandler extends AbstractHubActionHandler implements Fetche
             // feed has been actually retrieved from the web instead of being just read from cache
             try
             {
+                PerRequestUserAgentHttpClientFeedFetcher.setRequestUserAgent(String.format(
+                    Constants.USER_AGENT_FORMAT, hubUrl, 0));
                 feedFetcher.retrieveFeed(hubUrl.toURL());
             }
             catch (final Exception e)
             {
                 LOG.error("Failed to fetch content from: " + hubUrl, e);
+            }
+            finally
+            {
+                PerRequestUserAgentHttpClientFeedFetcher.removeRequestUserAgent();
             }
         }
 

@@ -22,7 +22,7 @@
                  p:objectStore-ref="pushObjectStore" />
                  
     <spring:bean id="feedFetcher"
-                 class="com.sun.syndication.fetcher.impl.HttpClientFeedFetcher"
+                 class="org.mule.module.pubsubhubbub.rome.PerRequestUserAgentHttpClientFeedFetcher"
                  p:preserveWireFeed="true"
                  p:feedInfoCache-ref="dataStore" />
                  

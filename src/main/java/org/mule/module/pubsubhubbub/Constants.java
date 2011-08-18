@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Constants
 {
-    public static String USER_AGENT_BASE = "Mule PubSubHubbub Hub";
+    public static String USER_AGENT_FORMAT = "Mule PubSubHubbub Hub (%s; %d subscribers)";
 
     public static String HUB_SIGNATURE_HEADER = "X-Hub-Signature";
 
