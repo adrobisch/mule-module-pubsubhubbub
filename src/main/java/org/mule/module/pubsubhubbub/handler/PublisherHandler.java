@@ -242,6 +242,14 @@ public class PublisherHandler extends AbstractHubActionHandler implements Fetche
     {
         final List<SyndEntry> newEntries = findNewFeedEntries(topicUrl, feed);
 
+        if (newEntries.isEmpty())
+        {
+            getLogger().info(
+                "Publisher has requested content distribution but no new feed entries have been found for: "
+                                + topicUrl);
+            return;
+        }
+
         final Set<TopicSubscription> topicSubscriptions = getDataStore().getTopicSubscriptions(topicUrl);
         if (!topicSubscriptions.isEmpty())
         {
