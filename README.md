@@ -15,6 +15,10 @@ Build Commands
 To compile and install in the local Maven repository:
 
     mvn clean install  
+
+Note that this will run the complete test suite, which contains numerous integration tests hence can take a little while. If it takes too much time, use:
+
+    mvn -DskipTests clean install
     
     
 Implementation Status
