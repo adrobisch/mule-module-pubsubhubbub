@@ -21,6 +21,7 @@ public class Constants
     public static String USER_AGENT_FORMAT = "Mule PubSubHubbub Hub (%s; %d subscribers)";
 
     public static String HUB_SIGNATURE_HEADER = "X-Hub-Signature";
+    public static String HUB_ON_BEHALF_OF_HEADER = "X-Hub-On-Behalf-Of";
 
     public static String RSS_CONTENT_TYPE = "application/rss+xml";
     public static String ATOM_CONTENT_TYPE = "application/atom+xml";

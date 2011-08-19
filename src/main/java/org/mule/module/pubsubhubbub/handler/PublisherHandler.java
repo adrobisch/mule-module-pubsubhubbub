@@ -30,7 +30,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mule.api.MuleContext;
@@ -40,6 +39,7 @@ import org.mule.api.retry.RetryContext;
 import org.mule.module.client.MuleClient;
 import org.mule.module.pubsubhubbub.Constants;
 import org.mule.module.pubsubhubbub.HubResource;
+import org.mule.module.pubsubhubbub.data.DataStore;
 import org.mule.module.pubsubhubbub.data.TopicSubscription;
 import org.mule.module.pubsubhubbub.rome.PerRequestUserAgentHttpClientFeedFetcher;
 import org.mule.transport.http.HttpConnector;
@@ -59,14 +59,14 @@ public class PublisherHandler extends AbstractHubActionHandler implements Fetche
     public static class ContentFetchWork implements Work
     {
         private static final Log LOG = LogFactory.getLog(ContentFetchWork.class);
+
+        private final DataStore dataStore;
         private final FeedFetcher feedFetcher;
         private final URI hubUrl;
 
-        protected ContentFetchWork(final FeedFetcher feedFetcher, final URI hubUrl)
+        protected ContentFetchWork(final DataStore dataStore, final FeedFetcher feedFetcher, final URI hubUrl)
         {
-            Validate.notNull(feedFetcher, "feedFetcher can't be null");
-            Validate.notNull(hubUrl, "hubUrl can't be null");
-
+            this.dataStore = dataStore;
             this.feedFetcher = feedFetcher;
             this.hubUrl = hubUrl;
         }
@@ -78,7 +78,7 @@ public class PublisherHandler extends AbstractHubActionHandler implements Fetche
             try
             {
                 PerRequestUserAgentHttpClientFeedFetcher.setRequestUserAgent(String.format(
-                    Constants.USER_AGENT_FORMAT, hubUrl, 0));
+                    Constants.USER_AGENT_FORMAT, hubUrl, dataStore.getTotalSubscriberCount(hubUrl)));
                 feedFetcher.retrieveFeed(hubUrl.toURL());
             }
             catch (final Exception e)
@@ -100,26 +100,23 @@ public class PublisherHandler extends AbstractHubActionHandler implements Fetche
     public static class DistributeContentRetryCallback implements RetryCallback
     {
         private static final Log LOG = LogFactory.getLog(DistributeContentRetryCallback.class);
-        private final MuleContext muleContext;
-        private final String contentType;
-        private final URI callbackUrl;
 
-        protected final String distributedContent;
+        private final MuleContext muleContext;
+        private final DataStore dataStore;
+        protected final ContentDistributionContext contentDistributionContext;
 
         protected DistributeContentRetryCallback(final MuleContext muleContext,
-                                                 final String contentType,
-                                                 final String distributedContent,
-                                                 final URI callbackUrl)
+                                                 final DataStore dataStore,
+                                                 final ContentDistributionContext contentDistributionContext)
         {
             this.muleContext = muleContext;
-            this.contentType = contentType;
-            this.distributedContent = distributedContent;
-            this.callbackUrl = callbackUrl;
+            this.dataStore = dataStore;
+            this.contentDistributionContext = contentDistributionContext;
         }
 
         public String getWorkDescription()
         {
-            return "Distributing content to " + callbackUrl;
+            return "Distributing content to " + contentDistributionContext.getCallbackUrl();
         }
 
         public void doWork(final RetryContext context) throws Exception
@@ -127,12 +124,14 @@ public class PublisherHandler extends AbstractHubActionHandler implements Fetche
             final Map<String, String> headers = new HashMap<String, String>();
             addHeaders(headers);
 
-            final MuleMessage response = new MuleClient(muleContext).send(callbackUrl.toString(),
-                distributedContent, headers, (int) Constants.SUBSCRIBER_TIMEOUT_MILLIS);
+            final MuleMessage response = new MuleClient(muleContext).send(
+                contentDistributionContext.getCallbackUrl().toString(),
+                contentDistributionContext.getPayload(), headers, (int) Constants.SUBSCRIBER_TIMEOUT_MILLIS);
 
             if (response == null)
             {
-                throw new TimeoutException("Failed to send content to: " + callbackUrl);
+                throw new TimeoutException("Failed to send content to: "
+                                           + contentDistributionContext.getCallbackUrl());
             }
 
             final String getResponseStatusCode = response.getInboundProperty(
@@ -141,15 +140,28 @@ public class PublisherHandler extends AbstractHubActionHandler implements Fetche
             if (!StringUtils.startsWith(getResponseStatusCode, "2"))
             {
                 throw new IllegalArgumentException("Received status " + getResponseStatusCode + " from: "
-                                                   + callbackUrl);
+                                                   + contentDistributionContext.getCallbackUrl());
             }
 
-            LOG.info("Successfully distributed content to: " + callbackUrl);
+            final String onBehalfOf = response.getInboundProperty(Constants.HUB_ON_BEHALF_OF_HEADER, "");
+            if (StringUtils.isNotBlank(onBehalfOf))
+            {
+                final int subscriberCount = Integer.valueOf(onBehalfOf);
+                dataStore.storeSubscriberCount(contentDistributionContext.getTopicUrl(),
+                    contentDistributionContext.getCallbackUrl(), subscriberCount);
+                LOG.info("Successfully distributed content to " + subscriberCount + " subscriber(s) at: "
+                         + contentDistributionContext.getCallbackUrl());
+            }
+            else
+            {
+                LOG.info("Successfully distributed content to: "
+                         + contentDistributionContext.getCallbackUrl());
+            }
         }
 
         protected void addHeaders(final Map<String, String> headers)
         {
-            headers.put(HttpHeaders.CONTENT_TYPE, contentType);
+            headers.put(HttpHeaders.CONTENT_TYPE, contentDistributionContext.getContentType());
         }
     }
 
@@ -159,12 +171,11 @@ public class PublisherHandler extends AbstractHubActionHandler implements Fetche
         private final String signature;
 
         protected DistributeAuthenticatedContentRetryCallback(final MuleContext muleContext,
-                                                              final String contentType,
-                                                              final String distributedContent,
-                                                              final URI callbackUrl,
+                                                              final DataStore dataStore,
+                                                              final ContentDistributionContext contentDistributionContext,
                                                               final byte[] secret) throws Exception
         {
-            super(muleContext, contentType, distributedContent, callbackUrl);
+            super(muleContext, dataStore, contentDistributionContext);
             signature = computeSignature(secret);
         }
 
@@ -182,8 +193,47 @@ public class PublisherHandler extends AbstractHubActionHandler implements Fetche
             final Mac mac = Mac.getInstance("HmacSHA1");
             mac.init(secretKey);
             // TODO use distributed content encoding
-            final byte[] rawHmac = mac.doFinal(distributedContent.getBytes());
+            final byte[] rawHmac = mac.doFinal(contentDistributionContext.getPayload().getBytes());
             return new String(Base64.encodeBase64(rawHmac));
+        }
+    }
+
+    public static class ContentDistributionContext
+    {
+        private final URI topicUrl;
+        private final String contentType;
+        private final String payload;
+        private final URI callbackUrl;
+
+        protected ContentDistributionContext(final URI topicUrl,
+                                             final String contentType,
+                                             final String payload,
+                                             final URI callbackUrl)
+        {
+            this.topicUrl = topicUrl;
+            this.contentType = contentType;
+            this.payload = payload;
+            this.callbackUrl = callbackUrl;
+        }
+
+        public URI getTopicUrl()
+        {
+            return topicUrl;
+        }
+
+        public String getContentType()
+        {
+            return contentType;
+        }
+
+        public String getPayload()
+        {
+            return payload;
+        }
+
+        public URI getCallbackUrl()
+        {
+            return callbackUrl;
         }
     }
 
@@ -206,8 +256,8 @@ public class PublisherHandler extends AbstractHubActionHandler implements Fetche
         {
             try
             {
-                getMuleContext().getWorkManager()
-                    .scheduleWork(new ContentFetchWork(getFeedFetcher(), hubUrl));
+                getMuleContext().getWorkManager().scheduleWork(
+                    new ContentFetchWork(getDataStore(), getFeedFetcher(), hubUrl));
             }
             catch (final Exception e)
             {
@@ -259,9 +309,9 @@ public class PublisherHandler extends AbstractHubActionHandler implements Fetche
         final Set<TopicSubscription> topicSubscriptions = getDataStore().getTopicSubscriptions(topicUrl);
         if (!topicSubscriptions.isEmpty())
         {
-            final String distributedContent = createDistributedContent(feed, newEntries);
+            final String payload = createDistributedPayload(feed, newEntries);
             final String contentType = getDistributedContentType(feed);
-            distributeContent(contentType, distributedContent, topicSubscriptions);
+            distributeContent(topicUrl, contentType, payload, topicSubscriptions);
         }
         else
         {
@@ -278,7 +328,7 @@ public class PublisherHandler extends AbstractHubActionHandler implements Fetche
                                                                         : Constants.ATOM_CONTENT_TYPE;
     }
 
-    private String createDistributedContent(final SyndFeed templateFeed, final List<SyndEntry> newEntries)
+    private String createDistributedPayload(final SyndFeed templateFeed, final List<SyndEntry> newEntries)
         throws CloneNotSupportedException, FeedException
     {
         final SyndFeed cloned = (SyndFeed) templateFeed.clone();
@@ -316,24 +366,28 @@ public class PublisherHandler extends AbstractHubActionHandler implements Fetche
         return entry.getUri();
     }
 
-    private void distributeContent(final String contentType,
-                                   final String distributedContent,
+    private void distributeContent(final URI topicUrl,
+                                   final String contentType,
+                                   final String payload,
                                    final Set<TopicSubscription> topicSubscriptions) throws Exception
     {
         for (final TopicSubscription topicSubscription : topicSubscriptions)
         {
+            final ContentDistributionContext contentDistributionContext = new ContentDistributionContext(
+                topicUrl, contentType, payload, topicSubscription.getCallbackUrl());
+
             if (topicSubscription.getSecret() != null)
             {
                 getRetryPolicyTemplate().execute(
-                    new DistributeAuthenticatedContentRetryCallback(getMuleContext(), contentType,
-                        distributedContent, topicSubscription.getCallbackUrl(), topicSubscription.getSecret()),
+                    new DistributeAuthenticatedContentRetryCallback(getMuleContext(), getDataStore(),
+                        contentDistributionContext, topicSubscription.getSecret()),
                     getMuleContext().getWorkManager());
             }
             else
             {
                 getRetryPolicyTemplate().execute(
-                    new DistributeContentRetryCallback(getMuleContext(), contentType, distributedContent,
-                        topicSubscription.getCallbackUrl()), getMuleContext().getWorkManager());
+                    new DistributeContentRetryCallback(getMuleContext(), getDataStore(),
+                        contentDistributionContext), getMuleContext().getWorkManager());
             }
         }
     }

@@ -282,6 +282,8 @@ public class HubITCase extends DynamicPortTestCase
         final SyndFeed syndFeed = new SyndFeedInput(true).build(new StringReader(
             (String) successfullSubscriberFTC.getLastReceivedMessage()));
         assertEquals("rss_2.0", syndFeed.getFeedType());
+
+        assertEquals(123, dataStore.getTotalSubscriberCount(new URI(topicUrl)));
     }
 
     //

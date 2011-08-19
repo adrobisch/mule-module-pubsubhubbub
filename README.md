@@ -20,7 +20,7 @@ To compile and install in the local Maven repository:
 Implementation Status
 ---------------------
 
-Done:
+Supported:
 
 - Subscription with Synchronous and Asynchronous Verification
 - Unsubscription with Synchronous and Asynchronous Verification
@@ -28,14 +28,12 @@ Done:
 - Content Fetch
 - Content Distribution
 - Authenticated Content Distribution
-
-Pending:
-
 - Number of subscribers in user agent (including support of X-Hub-On-Behalf-Of)
+
 
 Not Supported:
 
-- Aggregated Content Distribution
+- [Aggregated Content Distribution](http://pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.3.html#aggregatedistribution)
 
     
 Know Limitations

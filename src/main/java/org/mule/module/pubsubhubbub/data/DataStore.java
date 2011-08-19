@@ -18,6 +18,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mule.api.store.ObjectDoesNotExistException;
 import org.mule.api.store.ObjectStoreException;
 import org.mule.api.store.PartitionableObjectStore;
@@ -27,8 +29,11 @@ import com.sun.syndication.fetcher.impl.SyndFeedInfo;
 
 public class DataStore implements FeedFetcherCache
 {
+    private static final Log LOG = LogFactory.getLog(FeedFetcherCache.class);
+
     private static final String TOPIC_SUBSCRIPTION_CALLBACKS_PARTITION = "TopicSubscriptionCallbacks";
     private static final String TOPIC_FEED_IDS_PARTITION = "TopicFeedEntryIds";
+    private static final String SUBSCRIBER_COUNTS_PARTITION_PREFIX = "SubscriberCounts";
     private static final String FEED_FETCHER_CACHE_PARTITION = "FeedFetcherCache";
 
     private PartitionableObjectStore<Serializable> objectStore;
@@ -79,6 +84,34 @@ public class DataStore implements FeedFetcherCache
     {
         return (Set<String>) retrieve(topicUrl, TOPIC_FEED_IDS_PARTITION,
             (Serializable) Collections.EMPTY_SET);
+    }
+
+    public void storeSubscriberCount(final URI topicUrl, final URI callbackUrl, final int count)
+    {
+        store(callbackUrl, count, getTopicSubscribersCountDomain(topicUrl));
+    }
+
+    public int getTotalSubscriberCount(final URI topicUrl)
+    {
+        Integer result = 0;
+
+        try
+        {
+            final List<Serializable> keys = objectStore.allKeys(getTopicSubscribersCountDomain(topicUrl));
+
+            for (final Serializable key : keys)
+            {
+                result += (Integer) retrieve(key, getTopicSubscribersCountDomain(topicUrl), 0);
+            }
+        }
+        catch (final ObjectStoreException ose)
+        {
+            LOG.error("Failed to get total subscriber count", ose);
+        }
+
+        // return what we have, doesn't need to be accurate but no need to throw an exception if we can't get the exact
+        // number
+        return result;
     }
 
     // Support for Rome feed fetcher
@@ -202,4 +235,8 @@ public class DataStore implements FeedFetcherCache
         }
     }
 
+    private static String getTopicSubscribersCountDomain(final URI topicUrl)
+    {
+        return SUBSCRIBER_COUNTS_PARTITION_PREFIX + topicUrl.toString();
+    }
 }
