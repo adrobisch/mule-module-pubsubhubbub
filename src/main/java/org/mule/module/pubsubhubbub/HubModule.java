@@ -17,9 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.mule.RequestContext;
 import org.mule.api.MuleContext;
 import org.mule.api.MuleEvent;
@@ -30,23 +31,16 @@ import org.mule.api.annotations.Module;
 import org.mule.api.annotations.Processor;
 import org.mule.api.annotations.param.Payload;
 import org.mule.api.context.MuleContextAware;
-import org.mule.api.lifecycle.Initialisable;
-import org.mule.api.lifecycle.InitialisationException;
 import org.mule.api.retry.RetryPolicyTemplate;
 import org.mule.api.store.PartitionableObjectStore;
-import org.mule.api.transformer.TransformerMessagingException;
 import org.mule.module.pubsubhubbub.data.DataStore;
 import org.mule.module.pubsubhubbub.handler.AbstractHubActionHandler;
 import org.mule.transport.http.HttpConnector;
 import org.mule.transport.http.HttpConstants;
-import org.mule.transport.http.transformers.HttpRequestBodyToParamMap;
 
-// FIXME re-implement HubResource in here and drop dependency on Jersey in favor of DevKit
 @Module(name = "pubsubhubbub", namespace = "http://www.mulesoft.org/schema/mule/pubsubhubbub", schemaLocation = "http://www.mulesoft.org/schema/mule/pubsubhubbub/3.2/mule-pubsubhubbub.xsd")
-public class HubModule implements MuleContextAware, Initialisable
+public class HubModule implements MuleContextAware
 {
-    private static final Log LOGGER = LogFactory.getLog(HubModule.class);
-
     private MuleContext muleContext;
 
     @Configurable
@@ -57,17 +51,14 @@ public class HubModule implements MuleContextAware, Initialisable
 
     private DataStore dataStore;
 
-    private HttpRequestBodyToParamMap httpRequestBodyToParamMap;
-
     private Map<HubMode, AbstractHubActionHandler> requestHandlers;
 
-    public void initialise() throws InitialisationException
+    @PostConstruct
+    public void wireResources()
     {
         dataStore = new DataStore(objectStore);
 
-        httpRequestBodyToParamMap = new HttpRequestBodyToParamMap();
-        httpRequestBodyToParamMap.setMuleContext(muleContext);
-
+        requestHandlers = new HashMap<HubMode, AbstractHubActionHandler>();
         for (final HubMode hubMode : HubMode.values())
         {
             requestHandlers.put(hubMode, hubMode.newHandler(muleContext, dataStore, retryPolicyTemplate));
@@ -75,13 +66,13 @@ public class HubModule implements MuleContextAware, Initialisable
     }
 
     @Processor(name = "hub")
-    public MuleMessage handleRequest(@Payload final Object payload) throws MuleException
+    public MuleMessage handleRequest(@Payload final Object payload) throws MuleException, DecoderException
     {
-        final MuleEvent muleEvent = RequestContext.getEvent();
-        return handleRequest(muleEvent, payload).buildMuleMessage(muleContext);
+        return handleRequest(RequestContext.getEvent(), payload).buildMuleMessage(muleContext);
     }
 
-    private HubResponse handleRequest(final MuleEvent muleEvent, final Object payload) throws MuleException
+    private HubResponse handleRequest(final MuleEvent muleEvent, final Object payload)
+        throws MuleException, DecoderException
     {
         final MuleMessage message = muleEvent.getMessage();
 
@@ -98,7 +89,19 @@ public class HubModule implements MuleContextAware, Initialisable
             return HubResponse.badRequest("Content type must be: application/x-www-form-urlencoded");
         }
 
-        final Map<String, List<String>> parameters = getParameters(muleEvent);
+        final Map<String, List<String>> parameters = HubUtils.getHttpPostParameters(muleEvent);
+
+        for (final Entry<String, List<String>> param : parameters.entrySet())
+        {
+            if ((param.getValue().size() > 1)
+                && (!Constants.SUPPORTED_MULTIVALUED_PARAMS.contains(param.getKey())))
+            {
+                return HubResponse.badRequest("Multivalued parameters are only supported for: "
+                                              + StringUtils.join(Constants.SUPPORTED_MULTIVALUED_PARAMS, ','));
+            }
+        }
+
+        // carry the request encoding as a parameters for usage downstream
         parameters.put(Constants.REQUEST_ENCODING_PARAM, Collections.singletonList(muleEvent.getEncoding()));
 
         try
@@ -113,32 +116,10 @@ public class HubModule implements MuleContextAware, Initialisable
 
     private HubResponse handleRequest(final Map<String, List<String>> parameters)
     {
-        // FIXME implement!
-        throw new UnsupportedOperationException("NOT IMPLEMENTED YET");
-    }
+        final HubMode hubMode = HubMode.parse(HubUtils.getMandatoryStringParameter(Constants.HUB_MODE_PARAM,
+            parameters));
 
-    @SuppressWarnings("unchecked")
-    private Map<String, List<String>> getParameters(final MuleEvent muleEvent)
-        throws TransformerMessagingException
-    {
-        final Map<String, Object> parameters = (Map<String, Object>) httpRequestBodyToParamMap.transform(
-            muleEvent.getMessage(), muleEvent);
-
-        final Map<String, List<String>> result = new HashMap<String, List<String>>();
-
-        for (final Entry<String, Object> parameter : parameters.entrySet())
-        {
-            if (parameter.getValue() instanceof List<?>)
-            {
-                result.put(parameter.getKey(), (List<String>) parameter.getValue());
-            }
-            else
-            {
-                result.put(parameter.getKey(), Collections.singletonList(((String) parameter.getValue())));
-            }
-        }
-
-        return result;
+        return requestHandlers.get(hubMode).handle(parameters);
     }
 
     public void setMuleContext(final MuleContext muleContext)

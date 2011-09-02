@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.Validate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mule.api.store.ObjectDoesNotExistException;
@@ -40,6 +41,7 @@ public class DataStore implements FeedFetcherCache
 
     public DataStore(final PartitionableObjectStore<Serializable> objectStore)
     {
+        Validate.notNull(objectStore, "objectStore can't be null");
         this.objectStore = objectStore;
     }
 

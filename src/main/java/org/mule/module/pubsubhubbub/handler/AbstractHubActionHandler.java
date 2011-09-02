@@ -13,6 +13,7 @@ package org.mule.module.pubsubhubbub.handler;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.Validate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mule.api.MuleContext;
@@ -37,6 +38,10 @@ public abstract class AbstractHubActionHandler
                                        final DataStore dataStore,
                                        final RetryPolicyTemplate retryPolicyTemplate)
     {
+        Validate.notNull(muleContext, "muleContext can't be null");
+        Validate.notNull(dataStore, "dataStore can't be null");
+        Validate.notNull(retryPolicyTemplate, "retryPolicyTemplate can't be null");
+
         this.muleContext = muleContext;
         this.dataStore = dataStore;
         this.retryPolicyTemplate = retryPolicyTemplate;
