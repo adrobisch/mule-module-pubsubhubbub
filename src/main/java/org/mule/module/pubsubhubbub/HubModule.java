@@ -45,6 +45,10 @@ public class HubModule implements MuleContextAware
 {
     private MuleContext muleContext;
 
+    private DataStore dataStore;
+
+    private Map<HubMode, AbstractHubActionHandler> requestHandlers;
+
     @Configurable
     private PartitionableObjectStore<Serializable> objectStore;
 
@@ -53,10 +57,6 @@ public class HubModule implements MuleContextAware
 
     @Configurable
     private int retryCount;
-
-    private DataStore dataStore;
-
-    private Map<HubMode, AbstractHubActionHandler> requestHandlers;
 
     @PostConstruct
     public void wireResources()
