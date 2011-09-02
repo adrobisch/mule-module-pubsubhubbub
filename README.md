@@ -38,25 +38,12 @@ Then configure the hub back-end store and retry policy:
         <!-- Any implementation of org.mule.util.store.PartitionableObjectStore can be used as a back-end for the hub -->
         <spring:bean id="hubObjectStore"
             class="org.mule.util.store.PartitionedInMemoryObjectStore" />
-
-        <!-- The policy template defines the hub behavior when it has to retry an operation like validating a subscription request -->
-        <spring:bean id="hubRetryPolicyTemplate"
-            class="org.mule.retry.async.AsynchronousRetryTemplate">
-            <spring:constructor-arg>
-                <spring:bean class="org.mule.retry.policies.SimpleRetryPolicyTemplate">
-                    <!-- retry 12 times every 5 minutes-->
-                    <spring:constructor-arg index="0"
-                        value="300000" />
-                    <spring:constructor-arg index="1"
-                        value="12" />
-                </spring:bean>
-            </spring:constructor-arg>
-        </spring:bean>
     </spring:beans>
 
+    <!-- The hub will retry failed operations (like confirming a subscription) every 5 minutes and a maximum of 12 times -->
     <pubsubhubbub:config objectStore-ref="hubObjectStore"
-                         retryPolicyTemplate-ref="hubRetryPolicyTemplate" />
-
+                         retryCount="12"
+                         retryFrequency="300000" />
 
 Exposing the hub to the outside world is then trivial:
 

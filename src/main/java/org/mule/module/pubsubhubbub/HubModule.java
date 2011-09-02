@@ -35,6 +35,8 @@ import org.mule.api.retry.RetryPolicyTemplate;
 import org.mule.api.store.PartitionableObjectStore;
 import org.mule.module.pubsubhubbub.data.DataStore;
 import org.mule.module.pubsubhubbub.handler.AbstractHubActionHandler;
+import org.mule.retry.async.AsynchronousRetryTemplate;
+import org.mule.retry.policies.SimpleRetryPolicyTemplate;
 import org.mule.transport.http.HttpConnector;
 import org.mule.transport.http.HttpConstants;
 
@@ -47,7 +49,10 @@ public class HubModule implements MuleContextAware
     private PartitionableObjectStore<Serializable> objectStore;
 
     @Configurable
-    private RetryPolicyTemplate retryPolicyTemplate;
+    private int retryFrequency;
+
+    @Configurable
+    private int retryCount;
 
     private DataStore dataStore;
 
@@ -58,10 +63,13 @@ public class HubModule implements MuleContextAware
     {
         dataStore = new DataStore(objectStore);
 
+        final RetryPolicyTemplate hubRetryPolicyTemplate = new AsynchronousRetryTemplate(
+            new SimpleRetryPolicyTemplate(retryFrequency, retryCount));
+
         requestHandlers = new HashMap<HubMode, AbstractHubActionHandler>();
         for (final HubMode hubMode : HubMode.values())
         {
-            requestHandlers.put(hubMode, hubMode.newHandler(muleContext, dataStore, retryPolicyTemplate));
+            requestHandlers.put(hubMode, hubMode.newHandler(muleContext, dataStore, hubRetryPolicyTemplate));
         }
     }
 
@@ -142,13 +150,23 @@ public class HubModule implements MuleContextAware
         return objectStore;
     }
 
-    public void setRetryPolicyTemplate(final RetryPolicyTemplate retryPolicyTemplate)
+    public int getRetryFrequency()
     {
-        this.retryPolicyTemplate = retryPolicyTemplate;
+        return retryFrequency;
     }
 
-    public RetryPolicyTemplate getRetryPolicyTemplate()
+    public void setRetryFrequency(final int retryFrequency)
     {
-        return retryPolicyTemplate;
+        this.retryFrequency = retryFrequency;
+    }
+
+    public int getRetryCount()
+    {
+        return retryCount;
+    }
+
+    public void setRetryCount(final int retryCount)
+    {
+        this.retryCount = retryCount;
     }
 }
