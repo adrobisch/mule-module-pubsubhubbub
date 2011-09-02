@@ -11,15 +11,55 @@
 package org.mule.module.pubsubhubbub;
 
 import org.apache.commons.lang.StringUtils;
+import org.mule.api.MuleContext;
+import org.mule.api.retry.RetryPolicyTemplate;
+import org.mule.module.pubsubhubbub.data.DataStore;
+import org.mule.module.pubsubhubbub.handler.AbstractHubActionHandler;
+import org.mule.module.pubsubhubbub.handler.PublisherHandler;
+import org.mule.module.pubsubhubbub.handler.SubscriptionHandler;
+import org.mule.module.pubsubhubbub.handler.UnsubscriptionHandler;
 
 public enum HubMode
 {
-    SUBSCRIBE, UNSUBSCRIBE, PUBLISH;
+    SUBSCRIBE
+    {
+        @Override
+        public AbstractHubActionHandler newHandler(final MuleContext muleContext,
+                                                   final DataStore dataStore,
+                                                   final RetryPolicyTemplate retryPolicyTemplate)
+        {
+            return new SubscriptionHandler(muleContext, dataStore, retryPolicyTemplate);
+        }
+    },
+    UNSUBSCRIBE
+    {
+        @Override
+        public AbstractHubActionHandler newHandler(final MuleContext muleContext,
+                                                   final DataStore dataStore,
+                                                   final RetryPolicyTemplate retryPolicyTemplate)
+        {
+            return new UnsubscriptionHandler(muleContext, dataStore, retryPolicyTemplate);
+        }
+    },
+    PUBLISH
+    {
+        @Override
+        public AbstractHubActionHandler newHandler(final MuleContext muleContext,
+                                                   final DataStore dataStore,
+                                                   final RetryPolicyTemplate retryPolicyTemplate)
+        {
+            return new PublisherHandler(muleContext, dataStore, retryPolicyTemplate);
+        }
+    };
 
     public String getMode()
     {
         return StringUtils.lowerCase(this.toString());
     }
+
+    public abstract AbstractHubActionHandler newHandler(MuleContext muleContext,
+                                                        DataStore dataStore,
+                                                        RetryPolicyTemplate retryPolicyTemplate);
 
     public static HubMode parse(final String s)
     {

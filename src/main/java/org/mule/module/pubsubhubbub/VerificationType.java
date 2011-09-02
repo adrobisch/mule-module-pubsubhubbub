@@ -14,9 +14,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,22 +31,22 @@ public enum VerificationType
     SYNC
     {
         @Override
-        public Response verify(final AbstractVerifiableRequest request,
-                               final AbstractHubActionHandler hubActionHandler,
-                               final Runnable successAction)
+        public HubResponse verify(final AbstractVerifiableRequest request,
+                                  final AbstractHubActionHandler hubActionHandler,
+                                  final Runnable successAction)
         {
 
             attemptVerification(request, hubActionHandler.getMuleContext());
             successAction.run();
-            return Response.noContent().build();
+            return HubResponse.noContent();
         }
     },
     ASYNC
     {
         @Override
-        public Response verify(final AbstractVerifiableRequest request,
-                               final AbstractHubActionHandler hubActionHandler,
-                               final Runnable successAction)
+        public HubResponse verify(final AbstractVerifiableRequest request,
+                                  final AbstractHubActionHandler hubActionHandler,
+                                  final Runnable successAction)
         {
             final RetryCallback callback = new RetryCallback()
             {
@@ -76,7 +73,7 @@ public enum VerificationType
                                            + request);
             }
 
-            return Response.status(Status.ACCEPTED).build();
+            return HubResponse.accepted();
         }
     };
 
@@ -95,9 +92,9 @@ public enum VerificationType
         }
     }
 
-    public abstract Response verify(AbstractVerifiableRequest request,
-                                    AbstractHubActionHandler hubActionHandler,
-                                    Runnable successAction);
+    public abstract HubResponse verify(AbstractVerifiableRequest request,
+                                       AbstractHubActionHandler hubActionHandler,
+                                       Runnable successAction);
 
     private static void attemptVerification(final AbstractVerifiableRequest request,
                                             final MuleContext muleContext)

@@ -23,10 +23,6 @@ import java.util.concurrent.TimeoutException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.resource.spi.work.Work;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -36,13 +32,16 @@ import org.mule.api.MuleContext;
 import org.mule.api.MuleMessage;
 import org.mule.api.retry.RetryCallback;
 import org.mule.api.retry.RetryContext;
+import org.mule.api.retry.RetryPolicyTemplate;
 import org.mule.module.client.MuleClient;
 import org.mule.module.pubsubhubbub.Constants;
-import org.mule.module.pubsubhubbub.HubResource;
+import org.mule.module.pubsubhubbub.HubResponse;
+import org.mule.module.pubsubhubbub.HubUtils;
 import org.mule.module.pubsubhubbub.data.DataStore;
 import org.mule.module.pubsubhubbub.data.TopicSubscription;
 import org.mule.module.pubsubhubbub.rome.PerRequestUserAgentHttpClientFeedFetcher;
 import org.mule.transport.http.HttpConnector;
+import org.mule.transport.http.HttpConstants;
 
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -54,8 +53,6 @@ import com.sun.syndication.io.WireFeedOutput;
 
 public class PublisherHandler extends AbstractHubActionHandler implements FetcherListener
 {
-    private FeedFetcher feedFetcher;
-
     public static class ContentFetchWork implements Work
     {
         private static final Log LOG = LogFactory.getLog(ContentFetchWork.class);
@@ -161,7 +158,7 @@ public class PublisherHandler extends AbstractHubActionHandler implements Fetche
 
         protected void addHeaders(final Map<String, String> headers)
         {
-            headers.put(HttpHeaders.CONTENT_TYPE, contentDistributionContext.getContentType());
+            headers.put(HttpConstants.HEADER_CONTENT_TYPE, contentDistributionContext.getContentType());
         }
     }
 
@@ -237,37 +234,39 @@ public class PublisherHandler extends AbstractHubActionHandler implements Fetche
         }
     }
 
-    public void setFeedFetcher(final FeedFetcher feedFetcher)
+    private final FeedFetcher feedFetcher;
+
+    public PublisherHandler(final MuleContext muleContext,
+                            final DataStore dataStore,
+                            final RetryPolicyTemplate retryPolicyTemplate)
     {
-        this.feedFetcher = feedFetcher;
+        super(muleContext, dataStore, retryPolicyTemplate);
+
+        feedFetcher = new PerRequestUserAgentHttpClientFeedFetcher(dataStore);
+        feedFetcher.setPreserveWireFeed(true);
         feedFetcher.addFetcherEventListener(this);
     }
 
-    public FeedFetcher getFeedFetcher()
-    {
-        return feedFetcher;
-    }
-
     @Override
-    public Response handle(final MultivaluedMap<String, String> formParams)
+    public HubResponse handle(final Map<String, List<String>> formParams)
     {
-        final List<URI> hubUrls = HubResource.getMandatoryUrlParameters(Constants.HUB_URL_PARAM, formParams);
+        final List<URI> hubUrls = HubUtils.getMandatoryUrlParameters(Constants.HUB_URL_PARAM, formParams);
         for (final URI hubUrl : hubUrls)
         {
             try
             {
                 getMuleContext().getWorkManager().scheduleWork(
-                    new ContentFetchWork(getDataStore(), getFeedFetcher(), hubUrl));
+                    new ContentFetchWork(getDataStore(), feedFetcher, hubUrl));
             }
             catch (final Exception e)
             {
                 final String errorMessage = "Failed to schedule content fetch for: " + hubUrl;
                 getLogger().error(errorMessage, e);
-                return Response.status(Status.INTERNAL_SERVER_ERROR).entity(errorMessage).build();
+                return HubResponse.serverError(errorMessage);
             }
         }
 
-        return Response.noContent().build();
+        return HubResponse.noContent();
     }
 
     public void fetcherEvent(final FetcherEvent event)

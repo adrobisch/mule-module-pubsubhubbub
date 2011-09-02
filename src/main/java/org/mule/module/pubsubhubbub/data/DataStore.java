@@ -36,9 +36,9 @@ public class DataStore implements FeedFetcherCache
     private static final String SUBSCRIBER_COUNTS_PARTITION_PREFIX = "SubscriberCounts";
     private static final String FEED_FETCHER_CACHE_PARTITION = "FeedFetcherCache";
 
-    private PartitionableObjectStore<Serializable> objectStore;
+    private final PartitionableObjectStore<Serializable> objectStore;
 
-    public void setObjectStore(final PartitionableObjectStore<Serializable> objectStore)
+    public DataStore(final PartitionableObjectStore<Serializable> objectStore)
     {
         this.objectStore = objectStore;
     }

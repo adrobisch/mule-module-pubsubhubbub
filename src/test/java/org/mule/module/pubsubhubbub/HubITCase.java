@@ -122,7 +122,17 @@ public class HubITCase extends DynamicPortTestCase
         return "push-tests-config.xml";
     }
 
-    public void testUnknownHubModeRequest() throws Exception
+    public void testBadContentType() throws Exception
+    {
+        final Map<String, List<String>> subscriptionRequest = new HashMap<String, List<String>>();
+        subscriptionRequest.put("hub.mode", Collections.singletonList("subscribe"));
+
+        final MuleMessage response = sendRequestToHub(subscriptionRequest, "application/octet-stream");
+        assertEquals("400", response.getInboundProperty("http.status"));
+        assertEquals("Content type must be: application/x-www-form-urlencoded", response.getPayloadAsString());
+    }
+
+    public void testUnknownHubMode() throws Exception
     {
         final Map<String, String> subscriptionRequest = new HashMap<String, String>();
         subscriptionRequest.put("hub.mode", "foo");
@@ -477,10 +487,16 @@ public class HubITCase extends DynamicPortTestCase
     private MuleMessage sendRequestToHub(final Map<String, List<String>> subscriptionRequest)
         throws MuleException
     {
-        final String hubUrl = "http://localhost:" + getHubPort() + "/push/hub";
+        return sendRequestToHub(subscriptionRequest, "application/x-www-form-urlencoded");
+    }
+
+    private MuleMessage sendRequestToHub(final Map<String, List<String>> subscriptionRequest,
+                                         final String contentType) throws MuleException
+    {
+        final String hubUrl = "http://localhost:" + getHubPort() + "/hub";
 
         final PostMethod postMethod = new PostMethod(hubUrl);
-        postMethod.setRequestHeader(HttpConstants.HEADER_CONTENT_TYPE, "application/x-www-form-urlencoded");
+        postMethod.setRequestHeader(HttpConstants.HEADER_CONTENT_TYPE, contentType);
         for (final Entry<String, List<String>> param : subscriptionRequest.entrySet())
         {
             for (final String value : param.getValue())

@@ -10,9 +10,13 @@
 
 package org.mule.module.pubsubhubbub.handler;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import java.util.List;
+import java.util.Map;
 
+import org.mule.api.MuleContext;
+import org.mule.api.retry.RetryPolicyTemplate;
+import org.mule.module.pubsubhubbub.HubResponse;
+import org.mule.module.pubsubhubbub.data.DataStore;
 import org.mule.module.pubsubhubbub.data.TopicSubscription;
 import org.mule.module.pubsubhubbub.request.AbstractVerifiableRequest;
 import org.mule.module.pubsubhubbub.request.UnsubscriptionRequest;
@@ -22,8 +26,15 @@ import org.mule.module.pubsubhubbub.request.UnsubscriptionRequest;
  */
 public class UnsubscriptionHandler extends AbstractHubActionHandler
 {
+    public UnsubscriptionHandler(final MuleContext muleContext,
+                                 final DataStore dataStore,
+                                 final RetryPolicyTemplate retryPolicyTemplate)
+    {
+        super(muleContext, dataStore, retryPolicyTemplate);
+    }
+
     @Override
-    public Response handle(final MultivaluedMap<String, String> formParams)
+    public HubResponse handle(final Map<String, List<String>> formParams)
     {
         final AbstractVerifiableRequest unsubscriptionRequest = new UnsubscriptionRequest(formParams);
         return unsubscriptionRequest.getVerificationType().verify(unsubscriptionRequest, this, new Runnable()

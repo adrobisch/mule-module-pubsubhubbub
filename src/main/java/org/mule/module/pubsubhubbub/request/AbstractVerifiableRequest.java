@@ -15,9 +15,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -25,7 +24,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mule.module.pubsubhubbub.Constants;
-import org.mule.module.pubsubhubbub.HubResource;
+import org.mule.module.pubsubhubbub.HubUtils;
 import org.mule.module.pubsubhubbub.VerificationType;
 import org.mule.module.pubsubhubbub.data.TopicSubscription;
 
@@ -42,20 +41,20 @@ public abstract class AbstractVerifiableRequest implements Serializable
     private final VerificationType verificationType;
     private final String verificationToken;
 
-    public AbstractVerifiableRequest(final MultivaluedMap<String, String> formParams)
+    public AbstractVerifiableRequest(final Map<String, List<String>> formParams)
 
     {
-        callbackUrl = HubResource.getMandatoryUrlParameter(Constants.HUB_CALLBACK_PARAM, formParams);
-        topicUrls = HubResource.getMandatoryUrlParameters(Constants.HUB_TOPIC_PARAM, formParams);
+        callbackUrl = HubUtils.getMandatoryUrlParameter(Constants.HUB_CALLBACK_PARAM, formParams);
+        topicUrls = HubUtils.getMandatoryUrlParameters(Constants.HUB_TOPIC_PARAM, formParams);
         expiryTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(retrieveLeaseSeconds(formParams));
         secret = getSecretAsBytes(formParams);
         verificationType = retrieveSubscriptionVerificationMode(formParams);
-        verificationToken = formParams.getFirst(Constants.HUB_VERIFY_TOKEN_PARAM);
+        verificationToken = HubUtils.getFirstValue(formParams, Constants.HUB_VERIFY_TOKEN_PARAM);
     }
 
-    private byte[] getSecretAsBytes(final MultivaluedMap<String, String> formParams)
+    private byte[] getSecretAsBytes(final Map<String, List<String>> formParams)
     {
-        final String secretAsString = formParams.getFirst(Constants.HUB_SECRET_PARAM);
+        final String secretAsString = HubUtils.getFirstValue(formParams, Constants.HUB_SECRET_PARAM);
 
         if (StringUtils.isEmpty(secretAsString))
         {
@@ -64,7 +63,7 @@ public abstract class AbstractVerifiableRequest implements Serializable
 
         try
         {
-            final byte[] secretAsBytes = secretAsString.getBytes(HubResource.getMandatoryStringParameter(
+            final byte[] secretAsBytes = secretAsString.getBytes(HubUtils.getMandatoryStringParameter(
                 Constants.REQUEST_ENCODING_PARAM, formParams));
 
             if (secretAsBytes.length >= Constants.MAXIMUM_SECRET_SIZE)
@@ -123,9 +122,9 @@ public abstract class AbstractVerifiableRequest implements Serializable
         return verificationToken;
     }
 
-    private long retrieveLeaseSeconds(final MultivaluedMap<String, String> formParams)
+    private long retrieveLeaseSeconds(final Map<String, List<String>> formParams)
     {
-        final String leaseSecondString = formParams.getFirst(Constants.HUB_LEASE_SECONDS_PARAM);
+        final String leaseSecondString = HubUtils.getFirstValue(formParams, Constants.HUB_LEASE_SECONDS_PARAM);
 
         if (StringUtils.isBlank(leaseSecondString))
         {
@@ -135,7 +134,7 @@ public abstract class AbstractVerifiableRequest implements Serializable
         return Long.valueOf(leaseSecondString);
     }
 
-    private VerificationType retrieveSubscriptionVerificationMode(final MultivaluedMap<String, String> formParams)
+    private VerificationType retrieveSubscriptionVerificationMode(final Map<String, List<String>> formParams)
     {
         final List<String> verificationModes = formParams.get(Constants.HUB_VERIFY_PARAM);
 

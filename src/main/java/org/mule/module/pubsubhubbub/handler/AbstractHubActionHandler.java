@@ -10,34 +10,39 @@
 
 package org.mule.module.pubsubhubbub.handler;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mule.api.MuleContext;
-import org.mule.api.context.MuleContextAware;
 import org.mule.api.retry.RetryPolicyTemplate;
+import org.mule.module.pubsubhubbub.HubResponse;
 import org.mule.module.pubsubhubbub.data.DataStore;
 
 /**
  * Defines a handler for processing hub requests.
  */
-public abstract class AbstractHubActionHandler implements MuleContextAware
+public abstract class AbstractHubActionHandler
 {
     private final Log logger = LogFactory.getLog(getClass());
 
-    private MuleContext muleContext;
+    private final MuleContext muleContext;
 
-    private DataStore dataStore;
+    private final DataStore dataStore;
 
-    // TODO support different retry policies for subscription and publication workflows
-    private RetryPolicyTemplate retryPolicyTemplate;
+    private final RetryPolicyTemplate retryPolicyTemplate;
 
-    public void setMuleContext(final MuleContext muleContext)
+    protected AbstractHubActionHandler(final MuleContext muleContext,
+                                       final DataStore dataStore,
+                                       final RetryPolicyTemplate retryPolicyTemplate)
     {
         this.muleContext = muleContext;
+        this.dataStore = dataStore;
+        this.retryPolicyTemplate = retryPolicyTemplate;
     }
+
+    public abstract HubResponse handle(final Map<String, List<String>> formParams);
 
     public MuleContext getMuleContext()
     {
@@ -49,19 +54,9 @@ public abstract class AbstractHubActionHandler implements MuleContextAware
         return logger;
     }
 
-    public void setDataStore(final DataStore dataStore)
-    {
-        this.dataStore = dataStore;
-    }
-
     public DataStore getDataStore()
     {
         return dataStore;
-    }
-
-    public void setRetryPolicyTemplate(final RetryPolicyTemplate retryPolicyTemplate)
-    {
-        this.retryPolicyTemplate = retryPolicyTemplate;
     }
 
     public RetryPolicyTemplate getRetryPolicyTemplate()
@@ -69,5 +64,4 @@ public abstract class AbstractHubActionHandler implements MuleContextAware
         return retryPolicyTemplate;
     }
 
-    public abstract Response handle(final MultivaluedMap<String, String> formParams);
 }

@@ -10,7 +10,8 @@
 
 package org.mule.module.pubsubhubbub.request;
 
-import javax.ws.rs.core.MultivaluedMap;
+import java.util.List;
+import java.util.Map;
 
 import org.mule.module.pubsubhubbub.HubMode;
 
@@ -18,7 +19,7 @@ public class UnsubscriptionRequest extends AbstractVerifiableRequest
 {
     private static final long serialVersionUID = 1L;
 
-    public UnsubscriptionRequest(final MultivaluedMap<String, String> formParams)
+    public UnsubscriptionRequest(final Map<String, List<String>> formParams)
     {
         super(formParams);
     }

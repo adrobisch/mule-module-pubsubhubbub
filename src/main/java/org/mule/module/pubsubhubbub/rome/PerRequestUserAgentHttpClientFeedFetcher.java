@@ -10,6 +10,7 @@
 
 package org.mule.module.pubsubhubbub.rome;
 
+import com.sun.syndication.fetcher.impl.FeedFetcherCache;
 import com.sun.syndication.fetcher.impl.HttpClientFeedFetcher;
 
 /**
@@ -18,6 +19,11 @@ import com.sun.syndication.fetcher.impl.HttpClientFeedFetcher;
 public class PerRequestUserAgentHttpClientFeedFetcher extends HttpClientFeedFetcher
 {
     private final static ThreadLocal<String> REQUEST_USER_AGENT = new ThreadLocal<String>();
+
+    public PerRequestUserAgentHttpClientFeedFetcher(final FeedFetcherCache cache)
+    {
+        super(cache);
+    }
 
     public static void setRequestUserAgent(final String requestUserAgent)
     {
