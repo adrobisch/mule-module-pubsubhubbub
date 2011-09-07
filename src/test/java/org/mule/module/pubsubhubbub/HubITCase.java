@@ -90,7 +90,7 @@ public class HubITCase extends DynamicPortTestCase
     protected void doSetUp() throws Exception
     {
         super.doSetUp();
-        dataStore = muleContext.getRegistry().lookupObject(DataStore.class);
+        dataStore = muleContext.getRegistry().lookupObject(HubModule.class).getDataStore();
         muleClient = new MuleClient(muleContext);
         setupSuccessfullSubscriberFTC(1);
         setupPublisherFTC(1);

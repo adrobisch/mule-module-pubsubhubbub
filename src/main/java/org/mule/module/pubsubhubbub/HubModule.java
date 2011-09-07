@@ -169,4 +169,9 @@ public class HubModule implements MuleContextAware
     {
         this.retryCount = retryCount;
     }
+
+    public DataStore getDataStore()
+    {
+        return dataStore;
+    }
 }
