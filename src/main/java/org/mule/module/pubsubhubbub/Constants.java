@@ -27,8 +27,6 @@ public class Constants
     public static String RSS_CONTENT_TYPE = "application/rss+xml";
     public static String ATOM_CONTENT_TYPE = "application/atom+xml";
 
-    // TODO make this configurable on the hub
-    public static final long DEFAULT_LEASE_SECONDS = TimeUnit.DAYS.toSeconds(7);
     public static final long SUBSCRIBER_TIMEOUT_MILLIS = TimeUnit.SECONDS.toMillis(15L);
 
     public static final int MAXIMUM_SECRET_SIZE = 200;
@@ -38,10 +36,12 @@ public class Constants
 
     // Common Parameters
     public static final String REQUEST_ENCODING_PARAM = "request.encoding";
+
     // Mandatory
     public static final String HUB_MODE_PARAM = "hub.mode";
 
     // Subscription Parameters
+    public static final String HUB_DEFAULT_LEASE_SECONDS_PARAM = "hub.default_lease_seconds";
     // Mandatory
     public static final String HUB_VERIFY_PARAM = "hub.verify";
     public static final String HUB_TOPIC_PARAM = "hub.topic";

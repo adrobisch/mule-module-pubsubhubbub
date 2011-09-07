@@ -11,7 +11,6 @@
 package org.mule.module.pubsubhubbub;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,8 @@ import org.mule.api.MuleMessage;
 import org.mule.api.annotations.Configurable;
 import org.mule.api.annotations.Module;
 import org.mule.api.annotations.Processor;
+import org.mule.api.annotations.param.Default;
+import org.mule.api.annotations.param.Optional;
 import org.mule.api.annotations.param.Payload;
 import org.mule.api.context.MuleContextAware;
 import org.mule.api.retry.RetryPolicyTemplate;
@@ -52,11 +53,22 @@ public class HubModule implements MuleContextAware
     @Configurable
     private PartitionableObjectStore<Serializable> objectStore;
 
+    // 5 minutes in millisecs
+    @Default(value = "300000")
+    @Optional
     @Configurable
     private int retryFrequency;
 
+    @Default(value = "12")
+    @Optional
     @Configurable
     private int retryCount;
+
+    // 7 days in seconds
+    @Default(value = "604800")
+    @Optional
+    @Configurable
+    private long defaultLeaseSeconds;
 
     @PostConstruct
     public void wireResources()
@@ -110,7 +122,9 @@ public class HubModule implements MuleContextAware
         }
 
         // carry the request encoding as a parameters for usage downstream
-        parameters.put(Constants.REQUEST_ENCODING_PARAM, Collections.singletonList(muleEvent.getEncoding()));
+        HubUtils.setSingleValue(parameters, Constants.REQUEST_ENCODING_PARAM, muleEvent.getEncoding());
+        HubUtils.setSingleValue(parameters, Constants.HUB_DEFAULT_LEASE_SECONDS_PARAM,
+            Long.toString(defaultLeaseSeconds));
 
         try
         {
@@ -168,6 +182,16 @@ public class HubModule implements MuleContextAware
     public void setRetryCount(final int retryCount)
     {
         this.retryCount = retryCount;
+    }
+
+    public long getDefaultLeaseSeconds()
+    {
+        return defaultLeaseSeconds;
+    }
+
+    public void setDefaultLeaseSeconds(final long defaultLeaseSeconds)
+    {
+        this.defaultLeaseSeconds = defaultLeaseSeconds;
     }
 
     public DataStore getDataStore()

@@ -13,6 +13,7 @@ package org.mule.module.pubsubhubbub;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,16 +31,31 @@ public abstract class HubUtils
         throw new UnsupportedOperationException("do not instantiate");
     }
 
-    public static String getFirstValue(final Map<String, List<String>> formParams, final String key)
+    public static String getFirstValue(final Map<String, List<String>> parameters, final String key)
     {
-        final List<String> values = formParams.get(key);
+        final List<String> values = parameters.get(key);
         return values == null || values.isEmpty() ? null : values.get(0);
     }
 
-    public static String getMandatoryStringParameter(final String name,
-                                                     final Map<String, List<String>> formParams)
+    public static String getFirstValue(final Map<String, List<String>> parameters,
+                                       final String key,
+                                       final String defaultKey)
     {
-        final String value = getFirstValue(formParams, name);
+        final String value = getFirstValue(parameters, key);
+        return value != null ? value : getFirstValue(parameters, defaultKey);
+    }
+
+    public static void setSingleValue(final Map<String, List<String>> parameters,
+                                      final String key,
+                                      final String value)
+    {
+        parameters.put(key, Collections.singletonList(value));
+    }
+
+    public static String getMandatoryStringParameter(final String name,
+                                                     final Map<String, List<String>> parameters)
+    {
+        final String value = getFirstValue(parameters, name);
 
         if (StringUtils.isEmpty(value))
         {
@@ -49,9 +65,9 @@ public abstract class HubUtils
         return value;
     }
 
-    public static URI getMandatoryUrlParameter(final String name, final Map<String, List<String>> formParams)
+    public static URI getMandatoryUrlParameter(final String name, final Map<String, List<String>> parameters)
     {
-        final String value = getMandatoryStringParameter(name, formParams);
+        final String value = getMandatoryStringParameter(name, parameters);
 
         try
         {
@@ -72,10 +88,10 @@ public abstract class HubUtils
     }
 
     public static List<URI> getMandatoryUrlParameters(final String name,
-                                                      final Map<String, List<String>> formParams)
+                                                      final Map<String, List<String>> parameters)
     {
 
-        final List<String> values = formParams.get(name);
+        final List<String> values = parameters.get(name);
 
         if ((values == null) || (values.isEmpty()))
         {

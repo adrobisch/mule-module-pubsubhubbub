@@ -124,13 +124,8 @@ public abstract class AbstractVerifiableRequest implements Serializable
 
     private long retrieveLeaseSeconds(final Map<String, List<String>> formParams)
     {
-        final String leaseSecondString = HubUtils.getFirstValue(formParams, Constants.HUB_LEASE_SECONDS_PARAM);
-
-        if (StringUtils.isBlank(leaseSecondString))
-        {
-            return Constants.DEFAULT_LEASE_SECONDS;
-        }
-
+        final String leaseSecondString = HubUtils.getFirstValue(formParams,
+            Constants.HUB_LEASE_SECONDS_PARAM, Constants.HUB_DEFAULT_LEASE_SECONDS_PARAM);
         return Long.valueOf(leaseSecondString);
     }
 

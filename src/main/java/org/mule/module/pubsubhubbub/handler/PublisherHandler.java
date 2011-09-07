@@ -189,7 +189,6 @@ public class PublisherHandler extends AbstractHubActionHandler implements Fetche
             final SecretKeySpec secretKey = new SecretKeySpec(secret, "HmacSHA1");
             final Mac mac = Mac.getInstance("HmacSHA1");
             mac.init(secretKey);
-            // TODO use distributed content encoding
             final byte[] rawHmac = mac.doFinal(contentDistributionContext.getPayload().getBytes());
             return new String(Base64.encodeBase64(rawHmac));
         }

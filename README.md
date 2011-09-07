@@ -37,10 +37,8 @@ Then configure the hub back-end store and retry policy:
             class="org.mule.util.store.PartitionedInMemoryObjectStore" />
     </spring:beans>
 
-    <!-- The hub will retry failed operations (like confirming a subscription) every 5 minutes and a maximum of 12 times -->
-    <pubsubhubbub:config objectStore-ref="hubObjectStore"
-                         retryCount="12"
-                         retryFrequency="300000" />
+    <!-- By default, the hub will retry failed operations (like confirming a subscription) every 5 minutes and a maximum of 12 times -->
+    <pubsubhubbub:config objectStore-ref="hubObjectStore" />
 
 Exposing the hub to the outside world is then trivial:
 
@@ -48,6 +46,13 @@ Exposing the hub to the outside world is then trivial:
         <http:inbound-endpoint address="http://localhost:8080/hub" />
         <pubsubhubbub:hub />
     </flow>
+
+If the default configuration values are not acceptable, the hub can be configured to use specific values:
+
+    <pubsubhubbub:config objectStore-ref="hubObjectStore"
+                         retryCount="5"
+                         retryFrequency="3600000"
+                         defaultLeaseSeconds="86400" />  
 
     
 Implementation Status
