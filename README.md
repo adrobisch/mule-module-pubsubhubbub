@@ -77,6 +77,5 @@ Not Supported:
 Known Limitations
 -----------------
 
-- Default lease length is fixed to 1 week
 - Subscriber HTTP interactions time-out is fixed to 15 seconds
 - The same retry policy is used for un/subscription verification, content fetch and delivery attempts
