@@ -22,7 +22,7 @@
     <logger name="org.mule">
       <level value="INFO"/> 
     </logger>
-    <logger name="org.mule.transport.pubsubhubbub">
+    <logger name="org.mule.module.pubsubhubbub">
       <level value="DEBUG"/> 
     </logger>
 
