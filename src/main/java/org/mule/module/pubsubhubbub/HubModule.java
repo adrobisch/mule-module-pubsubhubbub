@@ -30,6 +30,7 @@ import org.mule.api.annotations.Module;
 import org.mule.api.annotations.Processor;
 import org.mule.api.annotations.param.Default;
 import org.mule.api.annotations.param.Optional;
+import org.mule.api.annotations.param.OutboundHeaders;
 import org.mule.api.annotations.param.Payload;
 import org.mule.api.context.MuleContextAware;
 import org.mule.api.retry.RetryPolicyTemplate;
@@ -86,9 +87,13 @@ public class HubModule implements MuleContextAware
     }
 
     @Processor(name = "hub")
-    public MuleMessage handleRequest(@Payload final Object payload) throws MuleException, DecoderException
+    public String handleRequest(@Payload final Object payload,
+                                @OutboundHeaders final Map<String, Object> responseHeaders)
+        throws MuleException, DecoderException
     {
-        return handleRequest(RequestContext.getEvent(), payload).buildMuleMessage(muleContext);
+        final HubResponse response = handleRequest(RequestContext.getEvent(), payload);
+        responseHeaders.put(HttpConnector.HTTP_STATUS_PROPERTY, response.getStatus());
+        return response.getBody();
     }
 
     private HubResponse handleRequest(final MuleEvent muleEvent, final Object payload)

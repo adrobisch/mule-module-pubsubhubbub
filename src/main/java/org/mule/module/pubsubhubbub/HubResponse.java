@@ -10,12 +10,6 @@
 
 package org.mule.module.pubsubhubbub;
 
-import java.util.Collections;
-
-import org.mule.DefaultMuleMessage;
-import org.mule.api.MuleContext;
-import org.mule.api.MuleMessage;
-import org.mule.transport.http.HttpConnector;
 import org.mule.transport.http.HttpConstants;
 
 public class HubResponse
@@ -29,10 +23,14 @@ public class HubResponse
         this.body = body;
     }
 
-    public MuleMessage buildMuleMessage(final MuleContext muleContext)
+    public String getBody()
     {
-        return new DefaultMuleMessage(body, Collections.singletonMap(HttpConnector.HTTP_STATUS_PROPERTY,
-            (Object) status), muleContext);
+        return body;
+    }
+
+    public int getStatus()
+    {
+        return status;
     }
 
     public static HubResponse badRequest(final String message)
