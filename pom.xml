@@ -11,7 +11,7 @@
     <url>http://www.muleforge.org/projects/mule-module-pubsubhubbub</url>
 
     <properties>
-        <mule.version>3.2.0-RC4-SNAPSHOT</mule.version>
+        <mule.version>3.2.0</mule.version>
         <mule.devkit.version>3.0-SNAPSHOT</mule.devkit.version>
         <spring.version>3.0.5.RELEASE</spring.version>
     </properties>
