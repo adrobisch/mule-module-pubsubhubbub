@@ -42,7 +42,12 @@ import org.mule.retry.policies.SimpleRetryPolicyTemplate;
 import org.mule.transport.http.HttpConnector;
 import org.mule.transport.http.HttpConstants;
 
-@Module(name = "pubsubhubbub", namespace = "http://www.mulesoft.org/schema/mule/pubsubhubbub", schemaLocation = "http://www.mulesoft.org/schema/mule/pubsubhubbub/3.2/mule-pubsubhubbub.xsd")
+/**
+ * Connector for pubsubhubbub. Pubsubhubbub is a simple, open, web-hook-based pubsub protocol & open source reference implementation.
+ *
+ * @author MuleSoft, Inc.
+ */
+@Module(name = "pubsubhubbub", schemaVersion = "3.2")
 public class HubModule implements MuleContextAware
 {
     private MuleContext muleContext;
@@ -51,21 +56,31 @@ public class HubModule implements MuleContextAware
 
     private Map<HubMode, AbstractHubActionHandler> requestHandlers;
 
+    /**
+     * Any implementation of {@link PartitionableObjectStore} can be used as a back-end for the hub
+     */
     @Configurable
     private PartitionableObjectStore<Serializable> objectStore;
 
-    // 5 minutes in millisecs
+    /**
+     * The retry frequency in milliseconds. Defaults to 5 minutes.
+     */
     @Default(value = "300000")
     @Optional
     @Configurable
     private int retryFrequency;
 
+    /**
+     * The retry count. Defaults to 12 times.
+     */
     @Default(value = "12")
     @Optional
     @Configurable
     private int retryCount;
 
-    // 7 days in seconds
+    /**
+     * The default lease time in milliseconds. Defaults to 7 days.
+     */
     @Default(value = "604800")
     @Optional
     @Configurable
@@ -86,6 +101,17 @@ public class HubModule implements MuleContextAware
         }
     }
 
+    /**
+     * Handles the request.
+     *
+     * {@sample.xml ../../../doc/pubsubhubbub-connector.xml.sample pubsubhubbub:handleRequest}
+     *
+     * @param payload the message payload
+     * @param responseHeaders the outbound/response headers
+     * @return the response body
+     * @throws MuleException
+     * @throws DecoderException
+     */
     @Processor(name = "hub")
     public String handleRequest(@Payload final Object payload,
                                 @OutboundHeaders final Map<String, Object> responseHeaders)
