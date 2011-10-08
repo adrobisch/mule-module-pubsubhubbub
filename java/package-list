@@ -1,0 +1,8 @@
+org.mule.module.pubsubhubbub
+org.mule.module.pubsubhubbub.config
+org.mule.module.pubsubhubbub.config.spring
+org.mule.module.pubsubhubbub.data
+org.mule.module.pubsubhubbub.handler
+org.mule.module.pubsubhubbub.request
+org.mule.module.pubsubhubbub.rome
+
