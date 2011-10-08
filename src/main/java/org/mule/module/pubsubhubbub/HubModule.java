@@ -43,8 +43,14 @@ import org.mule.transport.http.HttpConnector;
 import org.mule.transport.http.HttpConstants;
 
 /**
- * Connector for pubsubhubbub. Pubsubhubbub is a simple, open, web-hook-based pubsub protocol & open source reference implementation.
- *
+ * Allows Mule to act as a PubSubHubbub (aka PuSH) hub. Pubsubhubbub is a simple, open, web-hook-based pubsub protocol &
+ * open source reference implementation. <br/>
+ * This module implements the <a
+ * href="http://pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.3.html">PubSubHubbub Core 0.3 -- Working Draft
+ * specification</a>, except <a
+ * href="http://pubsubhubbub.googlecode.com/svn/trunk/pubsubhubbub-core-0.3.html#aggregatedistribution">7.5 Aggregated
+ * Content Distribution</a>.
+ * 
  * @author MuleSoft, Inc.
  */
 @Module(name = "pubsubhubbub", schemaVersion = "3.2")
@@ -57,7 +63,7 @@ public class HubModule implements MuleContextAware
     private Map<HubMode, AbstractHubActionHandler> requestHandlers;
 
     /**
-     * Any implementation of {@link PartitionableObjectStore} can be used as a back-end for the hub
+     * Any implementation of {@link PartitionableObjectStore} can be used as a back-end for the hub.
      */
     @Configurable
     private PartitionableObjectStore<Serializable> objectStore;
@@ -102,10 +108,10 @@ public class HubModule implements MuleContextAware
     }
 
     /**
-     * Handles the request.
-     *
+     * Handle all hub requests.
+     * <p/>
      * {@sample.xml ../../../doc/pubsubhubbub-connector.xml.sample pubsubhubbub:handleRequest}
-     *
+     * 
      * @param payload the message payload
      * @param responseHeaders the outbound/response headers
      * @return the response body

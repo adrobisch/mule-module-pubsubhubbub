@@ -1,6 +1,6 @@
 <!-- BEGIN_INCLUDE(pubsubhubbub:handleRequest) -->
-    <flow name="hub">
-        <http:inbound-endpoint address="http://localhost:${port1}/hub" />
-        <pubsubhubbub:hub />
-    </flow>
+<flow name="hub">
+    <http:inbound-endpoint address="http://localhost:${port1}/hub" />
+    <pubsubhubbub:hub />
+</flow>
 <!-- END_INCLUDE(pubsubhubbub:handleRequest) -->
