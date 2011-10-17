@@ -97,8 +97,9 @@ public class HubModule implements MuleContextAware
     {
         dataStore = new DataStore(objectStore);
 
-        final RetryPolicyTemplate hubRetryPolicyTemplate = new AsynchronousRetryTemplate(
-            new SimpleRetryPolicyTemplate(retryFrequency, retryCount));
+        final SimpleRetryPolicyTemplate delegate = new SimpleRetryPolicyTemplate(retryFrequency, retryCount);
+        delegate.setMuleContext(getMuleContext());
+        final RetryPolicyTemplate hubRetryPolicyTemplate = new AsynchronousRetryTemplate(delegate);
 
         requestHandlers = new HashMap<HubMode, AbstractHubActionHandler>();
         for (final HubMode hubMode : HubMode.values())
