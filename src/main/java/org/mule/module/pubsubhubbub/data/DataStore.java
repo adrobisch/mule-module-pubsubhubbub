@@ -137,7 +137,8 @@ public class DataStore implements FeedFetcherCache
         return (SyndFeedInfo) remove(feedUrl, FEED_FETCHER_CACHE_PARTITION);
     }
 
-    private void store(final Serializable key, final Serializable value, final String domain)
+    // Private supporting methods, mostly synchronized because of the lack of atomicity of ObjectStore
+    private synchronized void store(final Serializable key, final Serializable value, final String domain)
     {
         try
         {
@@ -155,7 +156,7 @@ public class DataStore implements FeedFetcherCache
         }
     }
 
-    private Serializable remove(final Serializable key, final String domain)
+    private synchronized Serializable remove(final Serializable key, final String domain)
     {
         try
         {
@@ -171,7 +172,7 @@ public class DataStore implements FeedFetcherCache
         }
     }
 
-    private void flush(final String domain)
+    private synchronized void flush(final String domain)
     {
         try
         {
@@ -188,7 +189,7 @@ public class DataStore implements FeedFetcherCache
         }
     }
 
-    private void storeInSet(final Serializable key, final Serializable value, final String domain)
+    private synchronized void storeInSet(final Serializable key, final Serializable value, final String domain)
     {
         // not atomic :(
         @SuppressWarnings("unchecked")
@@ -204,7 +205,9 @@ public class DataStore implements FeedFetcherCache
         store(key, (Serializable) values, domain);
     }
 
-    private void removeFromSet(final Serializable key, final Serializable value, final String domain)
+    private synchronized void removeFromSet(final Serializable key,
+                                            final Serializable value,
+                                            final String domain)
     {
         // not atomic :(
         @SuppressWarnings("unchecked")
@@ -221,7 +224,9 @@ public class DataStore implements FeedFetcherCache
         store(key, (Serializable) values, domain);
     }
 
-    private Serializable retrieve(final Serializable key, final String domain, final Serializable defaultValue)
+    private synchronized Serializable retrieve(final Serializable key,
+                                               final String domain,
+                                               final Serializable defaultValue)
     {
         try
         {
