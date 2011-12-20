@@ -29,6 +29,7 @@ import org.mule.api.annotations.Configurable;
 import org.mule.api.annotations.Module;
 import org.mule.api.annotations.Processor;
 import org.mule.api.annotations.param.Default;
+import org.mule.api.annotations.param.InboundHeaders;
 import org.mule.api.annotations.param.Optional;
 import org.mule.api.annotations.param.OutboundHeaders;
 import org.mule.api.annotations.param.Payload;
@@ -56,7 +57,7 @@ import org.mule.transport.http.HttpConstants;
 @Module(name = "pubsubhubbub", schemaVersion = "3.2")
 public class HubModule implements MuleContextAware
 {
-    private MuleContext muleContext;
+	private MuleContext muleContext;
 
     private DataStore dataStore;
 
@@ -115,25 +116,49 @@ public class HubModule implements MuleContextAware
      * 
      * @param payload the message payload
      * @param responseHeaders the outbound/response headers
+     * @param requestHeaders the inbound request headers
      * @return the response body
      * @throws MuleException
      * @throws DecoderException
      */
     @Processor(name = "hub")
     public String handleRequest(@Payload final Object payload,
-                                @OutboundHeaders final Map<String, Object> responseHeaders)
+                                @OutboundHeaders final Map<String, Object> responseHeaders,
+                                @InboundHeaders("*") final Map<String, Object> requestHeaders)
         throws MuleException, DecoderException
     {
         final HubResponse response = handleRequest(RequestContext.getEvent(), payload);
         responseHeaders.put(HttpConnector.HTTP_STATUS_PROPERTY, response.getStatus());
+        addCorsHeaders(responseHeaders, requestHeaders);
         return response.getBody();
     }
 
-    private HubResponse handleRequest(final MuleEvent muleEvent, final Object payload)
+    private void addCorsHeaders(Map<String, Object> responseHeaders,
+			Map<String, Object> requestHeaders) {
+        if (requestHeaders.get(Constants.ACCESS_CONTROL_REQUEST_HEADERS) != null){
+            responseHeaders.put(Constants.ACCESS_CONTROL_ALLOW_HEADERS, requestHeaders.get(Constants.ACCESS_CONTROL_REQUEST_HEADERS));
+        }
+        
+        if (requestHeaders.get(Constants.ORIGIN) != null){
+            responseHeaders.put(Constants.ACCESS_CONTROL_ALLOW_ORIGIN, requestHeaders.get(Constants.ORIGIN));
+        }
+        
+        responseHeaders.put(Constants.ACCESS_CONTROL_ALLOW_METHODS ,"POST, OPTIONS");
+	}
+
+	private HubResponse handleRequest(final MuleEvent muleEvent, final Object payload)
         throws MuleException, DecoderException
     {
         final MuleMessage message = muleEvent.getMessage();
-
+        
+        
+		if (StringUtils.equalsIgnoreCase(message.getInboundProperty(
+				HttpConnector.HTTP_METHOD_PROPERTY, ""),
+				HttpConstants.METHOD_OPTIONS)) 
+		{
+			return HubResponse.ok();
+		}
+        
         if (!StringUtils.equalsIgnoreCase(message.getInboundProperty(HttpConnector.HTTP_METHOD_PROPERTY, ""),
             HttpConstants.METHOD_POST))
         {

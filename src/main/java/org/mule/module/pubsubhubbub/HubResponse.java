@@ -32,7 +32,12 @@ public class HubResponse
     {
         return status;
     }
-
+    
+    public static HubResponse ok()
+    {
+        return new HubResponse(HttpConstants.SC_OK, "");
+    }
+    
     public static HubResponse badRequest(final String message)
     {
         return new HubResponse(HttpConstants.SC_BAD_REQUEST, message);

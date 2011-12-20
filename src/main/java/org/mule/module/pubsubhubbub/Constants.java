@@ -18,7 +18,13 @@ import java.util.concurrent.TimeUnit;
 
 public class Constants
 {
-    public static String USER_AGENT_FORMAT = "Mule PubSubHubbub Hub (%s; %d subscribers)";
+	public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
+    public static final String ORIGIN = "Origin";
+	public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+	public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
+	public static final String ACCESS_CONTROL_REQUEST_HEADERS = "Access-Control-Request-Headers";
+	
+	public static String USER_AGENT_FORMAT = "Mule PubSubHubbub Hub (%s; %d subscribers)";
 
     public static String HUB_SIGNATURE_HEADER = "X-Hub-Signature";
     public static String HUB_ON_BEHALF_OF_HEADER = "X-Hub-On-Behalf-Of";
